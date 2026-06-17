@@ -1,0 +1,24 @@
+<svg width="200" height="48" viewBox="0 0 200 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- ICON BACKGROUND -->
+  <rect width="48" height="48" rx="14" fill="url(#main_grad)"/>
+  
+  <!-- ABSTRACT 'E' / LEARNING ICON -->
+  <path d="M24 12L13 18.5V31L24 37.5L35 31V18.5L24 12Z" fill="white" fill-opacity="0.95"/>
+  <path d="M24 12V37.5L35 31V18.5L24 12Z" fill="white" fill-opacity="0.3"/>
+  <path d="M24 18L18 21.5V28.5L24 32L30 28.5V21.5L24 18Z" fill="url(#main_grad)"/>
+  
+  <!-- GLOW EFFECT -->
+  <circle cx="24" cy="24" r="18" stroke="white" stroke-opacity="0.2" stroke-width="1"/>
+  
+  <!-- LOGO TEXT: E-Learning -->
+  <text x="62" y="32" font-family="'Outfit', 'Inter', sans-serif" font-weight="800" font-size="24" letter-spacing="0.02em" fill="#111827">E-</text>
+  <text x="88" y="32" font-family="'Outfit', 'Inter', sans-serif" font-weight="500" font-size="24" letter-spacing="0.02em" fill="#4B5563">Learning</text>
+  
+  <!-- DEFINITIONS -->
+  <defs>
+    <linearGradient id="main_grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2272EB"/>
+      <stop offset="1" stop-color="#5A3FF1"/>
+    </linearGradient>
+  </defs>
+</svg>

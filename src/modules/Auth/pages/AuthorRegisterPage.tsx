@@ -1,0 +1,397 @@
+import React, { useState, memo } from "react";
+import { Form } from "antd";
+import { Link } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type * as z from "zod";
+import { User, Mail, Lock, ShieldCheck, ArrowRight, Briefcase, ArrowLeft, Award } from "lucide-react";
+import { useRegisterInstructor } from "../queryHooks";
+import { instructorRegisterSchema } from "../constants";
+
+// UI Wrappers & Template Control
+import CInput, { CInputPassword } from "@/components/UI/Input";
+import CTextArea from "@/components/UI/TextArea";
+import CButton from "@/components/UI/Button";
+import Show from "@/components/UI/Template/Show";
+import CSteps from "@/components/UI/Steps";
+
+type RegisterFormData = z.infer<typeof instructorRegisterSchema>;
+
+const AuthorRegisterPage: React.FC = () => {
+  const [stage, setStage] = useState(1);
+  const { mutate: registerInstructor, isPending } = useRegisterInstructor();
+
+  const {
+    control,
+    handleSubmit,
+    trigger,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(instructorRegisterSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      headline: "",
+      biography: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const handleNext = async () => {
+    const isStage1Valid = await trigger([
+      "firstName",
+      "lastName",
+      "email",
+      "password",
+      "confirmPassword",
+    ]);
+    if (isStage1Valid) {
+      setStage(2);
+    }
+  };
+
+  const onSubmit = (data: RegisterFormData) => {
+    registerInstructor(data);
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-12 min-h-screen w-full overflow-hidden bg-gray-50">
+      {/* CỘT TRÁI: Giao diện nội dung thông tin thương hiệu */}
+      <div className="hidden md:flex md:col-span-6 lg:col-span-7 xl:col-span-8 bg-gradient-to-b from-[#0575e6] via-[#02298a] to-[#021b79] text-white flex-col justify-center relative overflow-hidden">
+        <div className="pl-[15%] pr-[10%] xl:pl-[20%] xl:pr-[15%] z-10">
+          <h1 className="text-5xl xl:text-6xl font-bold tracking-tight mb-4 text-white">
+            E-Learning
+          </h1>
+          <p className="text-lg xl:text-xl font-light mb-8 text-white/90 leading-relaxed max-w-md">
+            Learn, grow, and succeed with our interactive online courses.
+          </p>
+          <CButton
+            type="primary"
+            style={{
+              height: "46px",
+              borderRadius: "23px",
+              backgroundColor: "#0575e6",
+              color: "#ffffff",
+              border: "none",
+              fontWeight: 500,
+              fontSize: "14px",
+            }}
+            className="px-8 transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center"
+          >
+            <span>Read More</span>
+          </CButton>
+        </div>
+
+        {/* Các hình tròn trang trí */}
+        <div className="w-[557px] h-[557px] border border-[#0575e6]/40 rounded-full absolute bottom-0 left-0 -translate-x-[37%] translate-y-[48%]" />
+        <div className="w-[557px] h-[557px] border border-[#0575e6]/40 rounded-full absolute bottom-0 left-0 -translate-x-[23%] translate-y-[54%]" />
+      </div>
+
+      {/* CỘT PHẢI: Giao diện Đăng ký */}
+      <div className="col-span-12 md:col-span-6 lg:col-span-5 xl:col-span-4 flex items-center justify-center px-4 sm:px-8 md:px-4 lg:px-8 xl:px-12 bg-gray-50 py-12 relative">
+        <div className="w-full max-w-[420px] bg-white p-8 rounded-3xl shadow-xl border border-gray-100 z-10">
+          <div className="mb-6 text-left">
+            <h2 className="text-3xl font-extrabold text-[#222] mb-1 flex items-center gap-2">
+              <Award className="w-7 h-7 text-[#0575e6]" /> Hello Again!
+            </h2>
+            <p className="text-sm text-gray-500">
+              Đăng ký trở thành giảng viên E-Learning
+            </p>
+          </div>
+
+          {/* Steps Progress */}
+          <CSteps
+            current={stage - 1}
+            size="small"
+            className="mb-6"
+            items={[
+              { title: "Tài khoản" },
+              { title: "Chuyên môn" },
+            ]}
+          />
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Tối ưu Rule 3: Sử dụng component Show/Show.When thay thế toán tử logic */}
+            <Show>
+              <Show.When isTrue={stage === 1}>
+                <div className="space-y-3.5 animate-fade-in">
+                  {/* Họ & Tên */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-xs font-semibold text-gray-500 mb-1 block uppercase tracking-wider">Họ</span>
+                      <Controller
+                        name="firstName"
+                        control={control}
+                        render={({ field }) => (
+                          <Form.Item
+                            validateStatus={errors.firstName ? "error" : ""}
+                            help={errors.firstName?.message}
+                            className="mb-0"
+                          >
+                            <CInput
+                              {...field}
+                              prefix={<User size={16} className="text-gray-400 mr-1" />}
+                              placeholder="Nguyễn"
+                              style={{
+                                height: "50px",
+                                borderRadius: "12px",
+                                fontSize: "14px",
+                              }}
+                              className="border-gray-200 hover:border-blue-400 focus:border-blue-500 transition-colors"
+                            />
+                          </Form.Item>
+                        )}
+                      />
+                    </div>
+
+                    <div>
+                      <span className="text-xs font-semibold text-gray-500 mb-1 block uppercase tracking-wider">Tên</span>
+                      <Controller
+                        name="lastName"
+                        control={control}
+                        render={({ field }) => (
+                          <Form.Item
+                            validateStatus={errors.lastName ? "error" : ""}
+                            help={errors.lastName?.message}
+                            className="mb-0"
+                          >
+                            <CInput
+                              {...field}
+                              placeholder="Văn An"
+                              style={{
+                                height: "50px",
+                                borderRadius: "12px",
+                                fontSize: "14px",
+                              }}
+                              className="border-gray-200 hover:border-blue-400 focus:border-blue-500 transition-colors"
+                            />
+                          </Form.Item>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <span className="text-xs font-semibold text-gray-500 mb-1 block uppercase tracking-wider">Email</span>
+                    <Controller
+                      name="email"
+                      control={control}
+                      render={({ field }) => (
+                        <Form.Item
+                          validateStatus={errors.email ? "error" : ""}
+                          help={errors.email?.message}
+                          className="mb-0"
+                        >
+                          <CInput
+                            {...field}
+                            prefix={<Mail size={16} className="text-gray-400 mr-2" />}
+                            placeholder="example@email.com"
+                            style={{
+                              height: "50px",
+                              borderRadius: "12px",
+                              fontSize: "14px",
+                            }}
+                            className="border-gray-200 hover:border-blue-400 focus:border-blue-500 transition-colors"
+                          />
+                        </Form.Item>
+                      )}
+                    />
+                  </div>
+
+                  {/* Password */}
+                  <div>
+                    <span className="text-xs font-semibold text-gray-500 mb-1 block uppercase tracking-wider">Mật khẩu</span>
+                    <Controller
+                      name="password"
+                      control={control}
+                      render={({ field }) => (
+                        <Form.Item
+                          validateStatus={errors.password ? "error" : ""}
+                          help={errors.password?.message}
+                          className="mb-0"
+                        >
+                          <CInputPassword
+                            {...field}
+                            prefix={<Lock size={16} className="text-gray-400 mr-2" />}
+                            placeholder="••••••••"
+                            style={{
+                              height: "50px",
+                              borderRadius: "12px",
+                              fontSize: "14px",
+                            }}
+                            className="border-gray-200 hover:border-blue-400 focus:border-blue-500 transition-colors"
+                          />
+                        </Form.Item>
+                      )}
+                    />
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div>
+                    <span className="text-xs font-semibold text-gray-500 mb-1 block uppercase tracking-wider">Xác nhận mật khẩu</span>
+                    <Controller
+                      name="confirmPassword"
+                      control={control}
+                      render={({ field }) => (
+                        <Form.Item
+                          validateStatus={errors.confirmPassword ? "error" : ""}
+                          help={errors.confirmPassword?.message}
+                          className="mb-0"
+                        >
+                          <CInputPassword
+                            {...field}
+                            prefix={<ShieldCheck size={16} className="text-gray-400 mr-2" />}
+                            placeholder="••••••••"
+                            style={{
+                              height: "50px",
+                              borderRadius: "12px",
+                              fontSize: "14px",
+                            }}
+                            className="border-gray-200 hover:border-blue-400 focus:border-blue-500 transition-colors"
+                          />
+                        </Form.Item>
+                      )}
+                    />
+                  </div>
+
+                  <div className="pt-3">
+                    <CButton
+                      type="primary"
+                      onClick={handleNext}
+                      style={{
+                        height: "50px",
+                        borderRadius: "12px",
+                        backgroundColor: "#0575e6",
+                        color: "#ffffff",
+                        border: "none",
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                      }}
+                      className="w-full transition-colors shadow-md flex items-center justify-center gap-2"
+                    >
+                      Tiếp tục
+                      <ArrowRight size={18} />
+                    </CButton>
+                  </div>
+                </div>
+              </Show.When>
+
+              <Show.When isTrue={stage === 2}>
+                <div className="space-y-4 animate-fade-in">
+                  {/* Headline */}
+                  <div>
+                    <span className="text-xs font-semibold text-gray-500 mb-1 block uppercase tracking-wider">Headline</span>
+                    <Controller
+                      name="headline"
+                      control={control}
+                      render={({ field }) => (
+                        <Form.Item
+                          validateStatus={errors.headline ? "error" : ""}
+                          help={errors.headline?.message}
+                          className="mb-0"
+                        >
+                          <CInput
+                            {...field}
+                            prefix={<Briefcase size={16} className="text-gray-400 mr-2" />}
+                            placeholder="Ví dụ: Chuyên gia Spring Boot, Solution Architect..."
+                            style={{
+                              height: "50px",
+                              borderRadius: "12px",
+                              fontSize: "14px",
+                            }}
+                            className="border-gray-200 hover:border-blue-400 focus:border-blue-500 transition-colors"
+                          />
+                        </Form.Item>
+                      )}
+                    />
+                  </div>
+
+                  {/* Biography */}
+                  <div>
+                    <span className="text-xs font-semibold text-gray-500 mb-1 block uppercase tracking-wider">Biography</span>
+                    <Controller
+                      name="biography"
+                      control={control}
+                      render={({ field }) => (
+                        <Form.Item
+                          validateStatus={errors.biography ? "error" : ""}
+                          help={errors.biography?.message}
+                          className="mb-0"
+                        >
+                          <CTextArea
+                            {...field}
+                            rows={4}
+                            placeholder="Tóm tắt ngắn gọn về kinh nghiệm làm việc, dự án hoặc kinh nghiệm giảng dạy của bạn..."
+                            style={{
+                              borderRadius: "12px",
+                              fontSize: "14px",
+                            }}
+                            className="border-gray-200 hover:border-blue-400 focus:border-blue-500 transition-colors p-3"
+                          />
+                        </Form.Item>
+                      )}
+                    />
+                  </div>
+
+                  <div className="pt-2 flex gap-4">
+                    <CButton
+                      type="default"
+                      onClick={() => setStage(1)}
+                      style={{
+                        height: "50px",
+                        borderRadius: "12px",
+                        border: "1px solid #d9d9d9",
+                        color: "#595959",
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                        width: "35%",
+                      }}
+                      className="hover:border-blue-400 hover:text-blue-500 transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <ArrowLeft size={16} />
+                      Quay lại
+                    </CButton>
+                    <CButton
+                      type="primary"
+                      htmlType="submit"
+                      loading={isPending}
+                      style={{
+                        height: "50px",
+                        borderRadius: "12px",
+                        backgroundColor: "#0575e6",
+                        color: "#ffffff",
+                        border: "none",
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                        width: "65%",
+                      }}
+                      className="transition-colors shadow-md flex items-center justify-center gap-2"
+                    >
+                      Gửi yêu cầu
+                      <ArrowRight size={18} />
+                    </CButton>
+                  </div>
+                </div>
+              </Show.When>
+            </Show>
+
+            <div className="text-center pt-4 text-sm text-gray-500 border-t border-gray-100 mt-6">
+              Đã có tài khoản?{" "}
+              <Link
+                to="/login"
+                className="text-[#0575e6] font-bold hover:underline"
+              >
+                Đăng nhập
+              </Link>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default memo(AuthorRegisterPage);

@@ -1,0 +1,440 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Global Styles & Reset ── */
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background-color: #f8fafc; /* Slate-50 */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom scrollbar to prevent default white track border on Windows */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3); /* slate-400 with opacity */
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Antd modal & form optimizations */
+.ant-modal-header {
+  margin-bottom: 20px !important;
+}
+
+/* CModal Custom Overrides */
+.ant-modal-content {
+  padding: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+.ant-modal-header {
+  margin-bottom: 0 !important; /* Ghi đè margin-bottom 20px ở trên */
+}
+
+/* Khôi phục padding chuẩn cho các Modal Confirm của hệ thống */
+.ant-modal-confirm .ant-modal-content {
+  padding: 24px !important;
+  border-radius: 8px !important;
+}
+
+.ant-modal-confirm .ant-modal-header {
+  margin-bottom: 8px !important;
+}
+
+
+.ant-modal-body {
+  max-height: 85vh;
+  overflow: auto;
+}
+
+.ant-modal-title {
+  font-size: 18px !important;
+}
+
+.ant-modal-confirm-content {
+  max-width: 100% !important;
+}
+
+.ant-form-item-required {
+  position: relative;
+}
+
+.ant-form-item-required::after {
+  right: -10px;
+}
+
+.ant-form-item-required::before {
+  position: absolute;
+  margin-inline-end: -10px !important;
+  right: 0;
+}
+
+.ant-form-horizontal .ant-form-item-required {
+  margin-right: 12px;
+}
+
+.ant-form-horizontal .ant-form-item-required::before {
+  right: 13px;
+  top: 7px;
+}
+
+.ant-form-vertical .ant-form-item-required::after {
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0 !important;
+}
+
+.ant-picker-input input {
+  color: #2d394b !important;
+}
+
+.ant-tooltip-inner {
+  white-space: pre-wrap;
+}
+
+/* Tooltip and quick search overlay */
+.quickSearchOverlay .ant-tooltip-inner {
+  text-align: justify;
+  max-width: 500px;
+}
+
+.quickSearchOverlay .ant-tooltip-content {
+  min-width: max-content;
+}
+
+/* Modals sizing and styling utilities */
+.modal-dialog[class^="modal-"] .modal-content {
+  border-radius: 8px;
+}
+
+.modal-1200 {
+  max-width: 1200px;
+  width: 1200px;
+}
+
+.modal-1200 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-890 {
+  max-width: 890px;
+  width: 890px;
+}
+
+.modal-890 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-1100 {
+  max-width: 1100px;
+  width: 1100px;
+}
+
+.modal-1100 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+  border: 0px;
+}
+
+.modal-900 {
+  max-width: 900px;
+  width: 900px;
+}
+
+.modal-900 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+  border: 0px;
+}
+
+.modal-704 {
+  max-width: 704px;
+  width: 704px;
+}
+
+.modal-704 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-668 {
+  max-width: 662px;
+  width: 90vw;
+}
+
+.modal-668 .modal-content {
+  background-color: transparent;
+}
+
+.modal-600 {
+  max-width: 600px;
+  width: 600px;
+}
+
+.modal-600 .modal-content {
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.modal-596 {
+  max-width: 596px;
+  width: 596px;
+}
+
+.modal-596 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-584 {
+  max-width: 584px;
+  width: 584px;
+}
+
+.modal-584 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-590 {
+  max-width: 590px;
+}
+
+.modal-590 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-463 {
+  max-width: 463px;
+}
+
+.modal-463 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-500 {
+  max-width: 500px;
+  width: 500px;
+}
+
+.modal-500 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-550 {
+  max-width: 550px;
+  width: 550px;
+}
+
+.modal-550 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-468 {
+  max-width: 468px;
+  width: 468px;
+}
+
+.modal-468 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+  border: 0px;
+}
+
+.modal-461 {
+  max-width: 461px;
+  width: 461px;
+}
+
+.modal-461 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-450 {
+  max-width: 450px;
+  width: 450px;
+}
+
+.modal-450 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modalPdf {
+  max-width: 450px;
+  width: 450px;
+  max-height: 620px;
+}
+
+.modalPdf .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-437 {
+  max-width: 437px;
+  width: 437px;
+}
+
+.modal-437 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-434 {
+  max-width: 434px;
+  width: 434px;
+}
+
+.modal-434 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-416 {
+  max-width: 416px;
+  width: 416px;
+  position: absolute;
+  right: 20px;
+  top: 10px;
+}
+
+.modal-416 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+  border: 0px;
+}
+
+.modal-300 {
+  max-width: 300px;
+  width: 300px;
+}
+
+.modal-300 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+.modal-284 {
+  max-width: 284px;
+  width: 284px;
+}
+
+.modal-284 .modal-content {
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+/* Scroll wrapper utilities */
+.infinite-scroll-component__outerdiv {
+  height: 100%;
+}
+
+.infinite-scroll-component__outerdiv .infinite-scroll-component thead tr > th {
+  top: 0px;
+  position: sticky;
+}
+
+/* Utility Helpers */
+.cursor-pointer {
+  user-select: none;
+  cursor: pointer;
+}
+
+.mr-12 {
+  margin-right: 12px;
+}
+
+.tickers-list,
+.tickers-list-1 {
+  will-change: auto !important;
+}
+
+/* Custom Notification Content */
+.notificationContent {
+  width: auto;
+  padding: 5px 0 0 0 !important;
+}
+
+.notificationContent .ant-notification-notice-message {
+  padding-inline-end: 20px !important;
+}
+
+.ant-notification-notice-close {
+  top: 10px !important;
+  inset-inline-end: 10px !important;
+}
+
+/* Bootstrap / bootstrap-like custom utilities used in portals */
+.modal-backdrop.show {
+  opacity: 0.6;
+}
+
+.popover-body:hover {
+  background: #253147;
+}
+
+.popover-body:hover *:not(.not-change) svg path {
+  fill: #3391ff;
+}
+
+.popover-body:hover *:not(.not-change) div {
+  color: #3391ff;
+}
+
+.popover .arrow {
+  display: none;
+}
+
+.custom-control-label::before,
+.custom-control-label::after {
+  top: 0;
+}
+
+.react-flow__attribution {
+  display: none;
+}
+
+.custom-label-group-chart {
+  writing-mode: vertical-lr;
+  margin-top: -10px;
+  transform: translateY(-12px);
+}

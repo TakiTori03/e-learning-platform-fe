@@ -1,0 +1,59 @@
+# E-Learning FE Coding Rules & Guidelines
+
+You must strictly adhere to the following rules in this project when writing, refactoring, or reviewing code:
+
+## Rule 1: Quy Tắc Tổ Chức Thư Mục Module Hóa (Module-Based Layout)
+- Bắt buộc: Mọi tính năng nghiệp vụ có màn hình riêng phải được đóng gói gọn trong src/modules/<ModuleName>.
+- Không được khai báo API tập trung tại thư mục ngoài nếu API đó chỉ phục vụ cho một module duy nhất.
+- Phải duy trì cấu trúc tối thiểu gồm: pages/, components/, constants/, queryHooks/, services/, store/ (chỉ khi có CRUD), types.ts, routes.tsx.
+
+## Rule 2: Quy Tắc Đồng Bộ UI Components (Antd Wrapper Rule)
+- Tuyệt đối không import trực tiếp components tương tác (Input, Button, Table, Select, Modal, Tag, Steps...) từ antd vào các file trong src/modules. Chỉ được import layout/container (Card, Form, Row, Col, App, Upload, Tooltip, Dropdown, Space, Badge, Divider...) trực tiếp.
+- Tất cả các components tương tác phải đi qua lớp wrappers trong src/components/UI:
+  - **Input**: CInput, CInputPassword, CTextArea (auto trim + validateFields khi blur)
+  - **Button**: CButton (hỗ trợ typeCustom, sizeCustom, disabledCustom)
+  - **Select**: CSelect (auto filterOption), DebounceSelect (async search với debounce)
+  - **Table**: CTable (auto striped rows, default emptyText)
+  - **Modal**: CModal (auto centered, header xanh primary, close icon trắng, bo góc 16px). Khi dùng với Form.useForm(), dùng forceRender thay vì destroyOnClose.
+  - **Tag**: CTag (prop type: SUCCESS/PROCESSING/ERROR/WARNING/WAITING/DRAFT), CTagActive (prop value: 1=Hoạt động, 0=Tạm dừng)
+  - **Steps**: CSteps
+  - **Search**: CustomSearch (debounce search bar)
+  - **Chart**: ColumnChart (react-apexcharts)
+  - **Misc**: PageHeader, ReloadButton, CLoadingLazy
+- **Template utilities** (import từ @/components/UI/Template): Text, TextLink, TitleHeader, RowHeader, FlexBox, TotalTableMessage, StyledModalDetail, BtnGroupFooter, WrapperActionTable, CPagination, Show, For.
+- **Upload**: CUpload từ @/components/Upload (Dragger, auto validation video/image/document).
+- Mỗi input component trong lớp wrappers phải tự xử lý chuẩn hóa dữ liệu khi blur (trim khoảng trắng thừa đầu cuối) và tự động validateFields.
+
+## Rule 3: Quy Tắc Khai Báo Luồng Điều Kiển JSX (Declarative JSX Rule)
+- Hạn chế sử dụng toán tử ba ngôi phức tạp {condition ? <A /> : <B />} hoặc toán tử logic {condition && <A />} khi render component lớn. Phải sử dụng component <Show> / <Show.When> / <Show.Else> để phân nhánh luồng hiển thị.
+- Khi render danh sách, sử dụng component <For> thay thế cho hàm .map() để tăng độ rõ ràng và bảo đảm key được đánh tự động an toàn.
+
+## Rule 4: Quy Tắc Tách Biệt State Của Trang (Zustand Local Store Rule)
+- **Phạm vi áp dụng**: Chỉ bắt buộc áp dụng đối với các module/trang CRUD hoặc màn hình quản trị phức tạp (có nhiều hơn 1 Modal/Drawer hoặc cấu trúc con phức tạp). Không áp dụng cho các trang tĩnh hoặc luồng Form đơn giản (như Login, Register, Profile).
+- **Cách thức hoạt động**: Mỗi module CRUD phải có một local Zustand store trong thư mục store/useLocalStore.ts để quản lý:
+  - actionMode: Sử dụng enum `ActionsType` từ `@/constants/enums` (CREATE, READ, UPDATE, DELETE, APPROVED, REJECT, HISTORY, VERIFY). Mặc định "" khi không có hành động. Không tự khai báo string literal.
+  - idDetail: ID của bản ghi đang chọn thao tác.
+  - isValuesChanged: Theo dõi xem form đã bị thay đổi dữ liệu chưa.
+  - resetStore: Hàm đưa toàn bộ store về trạng thái khởi tạo khi người dùng đóng form/modal/drawer.
+- Có sẵn `ActionsTypeLabels` (Record<ActionsType, string>) để hiển thị nhãn tiếng Việt tương ứng.
+- Các component con không được truyền trực tiếp props chỉ để điều khiển đóng/mở form mà phải đọc trực tiếp từ Zustand store.
+
+## Rule 5: Quy Tắc Khai Báo Bảng Dữ Liệu (Decoupled Table Columns Rule)
+- File component (Container.tsx hoặc Table.tsx) chỉ khai báo thẻ <CTable> và các thuộc tính cơ bản.
+- Cấu trúc các cột (columns) phải được tách ra một factory function đặt trong constants/index.ts dưới tên getColumnsTable<ModuleName>.
+- Việc format ngày tháng (dayjs), gán màu nhãn trạng thái (Active/Inactive), hiển thị dropdown menu thao tác, và kiểm tra quyền của nút bấm phải được viết hoàn toàn bên trong hàm helper định nghĩa cột này.
+
+## Rule 6: Quy Tắc Sử Dụng React Query & API Generalization
+- Các module nghiệp vụ chuẩn hóa dữ liệu đầu ra cần tận dụng API tìm kiếm động toàn cục getDataTableByDomain bằng cách truyền tham số domain vào query key thay vì tự viết các API fetch riêng biệt.
+- Mọi hàm gọi API mutation (Add, Edit, Delete) trong module phải đi kèm với việc invalidate cache tương ứng ở tầng query hook thành công để giao diện tự động cập nhật dữ liệu mới nhất.
+- Custom Query Hooks phải chịu trách nhiệm xử lý thông báo thành công (notification.success) hoặc lỗi (NotificationError) thay vì viết logic này trong các Component.
+
+## Rule 7: Quy Tắc Đồng Bộ Màu Sắc & Theme (Theme Token Rule)
+- Tuyệt đối không hardcode mã màu hex/rgb trực tiếp trong style inline hoặc class của các component (ví dụ: `#2563eb`, `rgb(37,99,235)`).
+- Tất cả màu sắc chủ đạo và trạng thái phải sử dụng đồng bộ thông qua Design Tokens của Ant Design (`theme.useToken()`) hoặc các biến CSS variables đã được liên kết với file cấu hình `theme.tsx`.
+- Khi dùng class Tailwind, hãy ưu tiên các class màu động đã map như `text-primary`, `bg-primary`, `border-primary` thay vì sử dụng màu mặc định cố định như `text-blue-600` hay `bg-blue-600`.
+
+## TypeScript & Compilation Constraints
+- **Không dùng Classic enum**: Do dự án bật `"erasableSyntaxOnly": true` trong `tsconfig.json`, tuyệt đối không dùng `enum` của TS. Hãy dùng `const ... = { ... } as const` và `type union` tương ứng.
+- **Import type**: Dùng `import type` khi import types/interfaces để đảm bảo an toàn biên dịch bundler.
+- **Path alias**: Sử dụng `@/` trỏ tới `src/`. Cấu hình tương đối trong `tsconfig.app.json` phải là `"@/*": ["./src/*"]` và không thiết lập `baseUrl`.
