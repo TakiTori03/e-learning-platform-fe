@@ -9,7 +9,6 @@ import {
 import { Breadcrumb, Col, Rate, Row, Typography } from "antd";
 import { memo, useMemo } from "react";
 import { Link } from "react-router-dom";
-import CoursePricingCard from "./CoursePricingCard";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -42,7 +41,7 @@ export const CourseHero = ({ course }: CourseHeroProps) => {
   }, [course.level]);
 
   return (
-    <div className="bg-[#1c1d1f] text-white py-12 lg:py-16">
+    <div className="bg-[#1c1d1f] text-white py-12 lg:py-16 font-sans">
       <div className="container mx-auto px-4">
         <Row gutter={[48, 48]}>
           <Col xs={24} lg={16}>
@@ -77,7 +76,7 @@ export const CourseHero = ({ course }: CourseHeroProps) => {
                 {
                   title: (
                     <span
-                      className="font-bold"
+                      className="font-bold text-white/90"
                       style={{ color: "rgba(255,255,255,0.9)" }}
                     >
                       {course.category?.name}
@@ -98,10 +97,28 @@ export const CourseHero = ({ course }: CourseHeroProps) => {
               <CTag
                 type={TypeTagEnum.SUCCESS}
                 className="px-3 py-1 font-bold"
+                style={{ backgroundColor: "rgba(255,255,255,0.08)", color: "#fff" }}
               >
                 {course.category?.name}
               </CTag>
-              <CTag type={levelTagType} className="px-3 py-1 font-bold">
+              <CTag
+                type={levelTagType}
+                className="px-3 py-1 font-bold"
+                style={{
+                  backgroundColor:
+                    course.level === CourseLevel.BEGINNER
+                      ? "rgba(46,125,50,0.15)"
+                      : course.level === CourseLevel.INTERMEDIATE
+                      ? "rgba(237,108,2,0.15)"
+                      : "rgba(211,47,47,0.15)",
+                  color:
+                    course.level === CourseLevel.BEGINNER
+                      ? "#81c784"
+                      : course.level === CourseLevel.INTERMEDIATE
+                      ? "#ffb74d"
+                      : "#e57373",
+                }}
+              >
                 {levelLabel}
               </CTag>
             </div>
@@ -130,32 +147,25 @@ export const CourseHero = ({ course }: CourseHeroProps) => {
                 </Link>
               </div>
               <Text className="!text-white font-medium">
-                {course.studentCount?.toLocaleString() || 0} học viên đã tham
-                gia
+                {course.studentCount?.toLocaleString() || 0} học viên đã tham gia
               </Text>
             </div>
 
             <div className="flex flex-wrap items-center gap-x-10 gap-y-4 mb-4 text-sm">
               <span className="flex items-center gap-2 !text-white opacity-90">
-                <UserOutlined className="text-[#a435f0] text-lg" /> Giảng
-                viên:{" "}
+                <UserOutlined className="text-[#a435f0] text-lg" /> Giảng viên:{" "}
                 <Text
                   strong
                   className="cursor-pointer underline decoration-white/30 hover:text-blue-300 transition-colors"
                   style={{ color: "#60a5fa" }}
                 >
-                  {course.instructor
-                    && formatFullName(course.instructor)
-                    }
+                  {course.instructor && formatFullName(course.instructor)}
                 </Text>
               </span>
               <span className="flex items-center gap-3 !text-white opacity-90">
-                <CalendarOutlined className="text-[#a435f0] text-lg" /> Cập
-                nhật mới nhất:{" "}
+                <CalendarOutlined className="text-[#a435f0] text-lg" /> Cập nhật mới nhất:{" "}
                 <span style={{ color: "white" }}>
-                  {new Date(course.updatedAt || "").toLocaleDateString(
-                    "vi-VN"
-                  )}
+                  {new Date(course.updatedAt || "").toLocaleDateString("vi-VN")}
                 </span>
               </span>
               <span className="flex items-center gap-2 !text-white opacity-90">
@@ -166,10 +176,7 @@ export const CourseHero = ({ course }: CourseHeroProps) => {
           </Col>
 
           <Col xs={24} lg={8} className="relative mt-8 lg:mt-0">
-            {/* Sticky Card Container */}
-            <div className="lg:absolute lg:top-0 lg:w-full lg:z-20 sticky-sidebar">
-              <CoursePricingCard course={course} />
-            </div>
+            {/* Empty column on desktop, placeholder for the absolute pricing card */}
           </Col>
         </Row>
       </div>

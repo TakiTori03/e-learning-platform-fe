@@ -17,6 +17,7 @@ import {
   Statistic,
   Tag,
   Typography,
+  Pagination,
 } from "antd";
 import React, { useCallback, useMemo, useState } from "react";
 
@@ -45,7 +46,7 @@ const { Text, Paragraph } = Typography;
 
 const ReviewListPage: React.FC = () => {
   const [page, setPage] = useState(1);
-  const [size] = useState(10);
+  const [size, setSize] = useState(10);
   const [search, setSearch] = useState("");
   const [courseIdFilter, setCourseIdFilter] = useState<string | undefined>(undefined);
   const [ratingFilter, setRatingFilter] = useState<number | undefined>(undefined);
@@ -271,22 +272,33 @@ const ReviewListPage: React.FC = () => {
 
         <Show>
           <Show.When isTrue={!isInstructor || !!courseIdFilter}>
-            <CTable
-              columns={columns}
-              dataSource={reviewsData?.content}
-              rowKey="id"
-              loading={isLoading}
-              className="custom-table"
-              scroll={{ x: "max-content" }}
-              pagination={{
-                current: page,
-                pageSize: size,
-                total: reviewsData?.totalElements || 0,
-                onChange: (p) => setPage(p),
-                showTotal: TotalTableMessage,
-                showSizeChanger: false,
-              }}
-            />
+            <>
+              <CTable
+                columns={columns}
+                dataSource={reviewsData?.content}
+                rowKey="id"
+                loading={isLoading}
+                className="custom-table"
+                scroll={{ x: "max-content" }}
+                pagination={false}
+              />
+              {reviewsData && reviewsData.totalElements > 0 && (
+                <div className="flex justify-end mt-6">
+                  <Pagination
+                    current={page}
+                    pageSize={size}
+                    total={reviewsData.totalElements}
+                    onChange={(p, s) => {
+                      setPage(p);
+                      setSize(s);
+                    }}
+                    showTotal={(total) => `Tổng số ${total} đánh giá`}
+                    showSizeChanger={true}
+                    pageSizeOptions={["10", "20", "50", "100"]}
+                  />
+                </div>
+              )}
+            </>
           </Show.When>
           <Show.Else>
             <div className="flex flex-col items-center justify-center py-16 px-4 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 text-center space-y-3">

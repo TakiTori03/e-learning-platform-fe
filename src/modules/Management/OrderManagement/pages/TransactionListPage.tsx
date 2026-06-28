@@ -4,6 +4,7 @@ import {
   Col,
   Statistic,
   Descriptions,
+  Pagination,
 } from "antd";
 import {
   DollarOutlined,
@@ -33,7 +34,7 @@ import type { IPayment } from "@/type";
 
 const TransactionListPage: React.FC = () => {
   const [page, setPage] = useState(1);
-  const [size] = useState(10);
+  const [size, setSize] = useState(10);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<PaymentStatus | undefined>(undefined);
 
@@ -172,16 +173,27 @@ const TransactionListPage: React.FC = () => {
           loading={isLoading}
           className="custom-table"
           scroll={{ x: "max-content" }}
-          pagination={{
-            current: page,
-            pageSize: size,
-            total: txData?.totalElements || 0,
-            onChange: (p) => setPage(p),
-            showTotal: TotalTableMessage,
-            showSizeChanger: false,
-          }}
+          pagination={false}
         />
       </div>
+
+      {/* Pagination */}
+      {txData && txData.totalElements > 0 && (
+        <div className="flex justify-end mt-6">
+          <Pagination
+            current={page}
+            pageSize={size}
+            total={txData.totalElements}
+            onChange={(p, s) => {
+              setPage(p);
+              setSize(s);
+            }}
+            showTotal={(total) => `Tổng số ${total} giao dịch`}
+            showSizeChanger={true}
+            pageSizeOptions={["10", "20", "50", "100"]}
+          />
+        </div>
+      )}
 
       {/* Details Modal */}
       <CModal

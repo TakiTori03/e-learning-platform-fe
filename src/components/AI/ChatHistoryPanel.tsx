@@ -1,6 +1,6 @@
 import React from "react";
 import { DeleteOutlined } from "@ant-design/icons";
-import { Popconfirm } from "antd";
+import CPopconfirm from "@/components/UI/Popconfirm";
 import type { ChatSession } from "@/hooks/useGlobalChatStream";
 import styles from "./GlobalChatbot.module.css";
 
@@ -53,7 +53,7 @@ const ChatHistoryPanel: React.FC<ChatHistoryPanelProps> = ({
               })}
             </p>
           </div>
-          <Popconfirm
+          <CPopconfirm
             title="Xóa hội thoại này?"
             description="Tất cả tin nhắn sẽ bị xóa vĩnh viễn."
             onConfirm={(e) => {
@@ -71,7 +71,7 @@ const ChatHistoryPanel: React.FC<ChatHistoryPanelProps> = ({
             >
               <DeleteOutlined />
             </button>
-          </Popconfirm>
+          </CPopconfirm>
         </div>
       ))}
     </div>

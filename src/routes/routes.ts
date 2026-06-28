@@ -21,6 +21,7 @@ import { routes as staticRoutes } from "@/modules/StaticPages/routes";
 import { routes as socialRoutes } from "@/modules/Social/routes";
 import { routes as inboxRoutes } from "@/modules/Inbox/routes";
 import { routes as blogRoutes } from "@/modules/Blog/routes";
+import { routes as assessmentRoutes } from "@/modules/Assessment/routes";
 
 export const mainRoutes: RouterConfig[] = [
   ...homeRoutes,
@@ -39,6 +40,7 @@ export const mainRoutes: RouterConfig[] = [
   ...clientOrderRoutes,
   ...contactRoutes,
   ...learningRoutes,
+  ...assessmentRoutes,
   ...staticRoutes,
   ...socialRoutes,
   ...inboxRoutes,

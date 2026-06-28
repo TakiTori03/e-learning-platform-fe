@@ -1,34 +1,25 @@
+import CPopconfirm from "@/components/UI/Popconfirm";
 import { CourseStatus } from "@/constants/enums";
 import type { ICourse, IUserInfo } from "@/type";
-import { formatDateTime, formatFullName } from "@/utils/format";
-import { Empty, Pagination, Popconfirm, Spin, Timeline, Tooltip, Typography } from "antd";
+import { formatFullName } from "@/utils/format";
+import { Empty, Pagination, Spin, Table, Tooltip, Typography } from "antd";
 import {
   BookOpen,
   CheckCircle,
   History,
-  ShieldCheck,
-  XCircle,
+  XCircle
 } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-interface ICourseHistoryLog {
-  id: string;
-  type: string;
-  createdAt: string;
-  description: string;
-  userId?: string;
-  createdByName?: string;
-}
 
 // UI Wrappers & Template Components
 import CModal from "@/components/UI/Modal";
 import PageHeader from "@/components/UI/PageHeader";
 import CSelect from "@/components/UI/Select";
-import CTag, { TypeTagEnum } from "@/components/UI/Tag";
 import { Show } from "@/components/UI/Template";
 import CourseFilterBar from "../components/CourseFilterBar";
 import CourseGrid from "../components/CourseGrid";
+import { getHistoryColumns } from "../constants";
 
 // React Query hooks
 import {
@@ -52,6 +43,7 @@ export const AdminCourseList: React.FC = () => {
   const [historyModalVisible, setHistoryModalVisible] = useState(false);
   const [selectedCourseForHistory, setSelectedCourseForHistory] = useState<ICourse | null>(null);
   const [historyPage, setHistoryPage] = useState(1);
+
 
   const handleSearchChange = useCallback((value: string) => {
     setSearchText(value);
@@ -150,7 +142,7 @@ export const AdminCourseList: React.FC = () => {
     if (course.status === CourseStatus.PENDING) {
       const approveAction = (
         <Tooltip title="Phê duyệt khóa học" key="approve">
-          <Popconfirm
+          <CPopconfirm
             title="Phê duyệt khóa học này?"
             description="Khóa học sẽ được xuất bản công khai trên hệ thống."
             onConfirm={() => handleApprove(course)}
@@ -161,13 +153,13 @@ export const AdminCourseList: React.FC = () => {
               <CheckCircle className="w-4 h-4 mr-1.5 text-green-500" />
               <span>Duyệt</span>
             </div>
-          </Popconfirm>
+          </CPopconfirm>
         </Tooltip>
       );
 
       const rejectAction = (
         <Tooltip title="Từ chối phê duyệt" key="reject">
-          <Popconfirm
+          <CPopconfirm
             title="Từ chối khóa học này?"
             description="Khóa học sẽ bị từ chối và trả lại cho giảng viên chỉnh sửa."
             onConfirm={() => handleReject(course)}
@@ -179,19 +171,17 @@ export const AdminCourseList: React.FC = () => {
               <XCircle className="w-4 h-4 mr-1.5 text-red-500" />
               <span>Từ chối</span>
             </div>
-          </Popconfirm>
+          </CPopconfirm>
         </Tooltip>
       );
 
       return [viewCurriculum, approveAction, rejectAction, historyAction];
     }
 
-    let statusAction: React.ReactNode;
-
     if (course.status === CourseStatus.PUBLISHED) {
-      statusAction = (
+      const statusAction = (
         <Tooltip title="Gỡ khóa học khỏi hệ thống" key="unpublish">
-          <Popconfirm
+          <CPopconfirm
             title="Gỡ khóa học này?"
             description="Khóa học sẽ chuyển sang trạng thái bị từ chối và không hiển thị nữa."
             onConfirm={() => handleUnpublish(course)}
@@ -203,30 +193,14 @@ export const AdminCourseList: React.FC = () => {
               <XCircle className="w-4 h-4 mr-1.5 text-red-500" />
               <span className="text-xs font-semibold">Gỡ bỏ</span>
             </div>
-          </Popconfirm>
+          </CPopconfirm>
         </Tooltip>
       );
-    } else {
-      statusAction = (
-        <Tooltip title="Xuất bản trực tiếp khóa học này" key="force-publish">
-          <Popconfirm
-            title="Xuất bản trực tiếp khóa học?"
-            description="Khóa học sẽ được hiển thị công khai trên hệ thống."
-            onConfirm={() => handleForcePublish(course)}
-            okText="Xuất bản"
-            cancelText="Hủy"
-          >
-            <div className="flex justify-center items-center py-2 text-gray-500 hover:text-green-600 transition-colors cursor-pointer w-full">
-              <ShieldCheck className="w-4 h-4 mr-1.5 text-emerald-500" />
-              <span className="text-xs font-semibold">Xuất bản</span>
-            </div>
-          </Popconfirm>
-        </Tooltip>
-      );
+      return [viewCurriculum, statusAction, historyAction];
     }
 
-    return [viewCurriculum, statusAction, historyAction];
-  }, [navigate, handleApprove, handleReject, handleUnpublish, handleForcePublish]);
+    return [viewCurriculum, historyAction];
+  }, [navigate, handleApprove, handleReject, handleUnpublish]);
 
   const handlePageChange = useCallback((p: number, ps?: number) => {
     setPage(p);
@@ -309,10 +283,10 @@ export const AdminCourseList: React.FC = () => {
         open={historyModalVisible}
         onCancel={handleHistoryModalClose}
         footer={null}
-        width={500}
+        width={850}
         destroyOnClose
       >
-        <div className="py-4">
+        <div className="py-2">
           <Show>
             <Show.When isTrue={loadingHistory}>
               <div className="flex items-center justify-center h-48">
@@ -320,47 +294,13 @@ export const AdminCourseList: React.FC = () => {
               </div>
             </Show.When>
             <Show.When isTrue={!!(historyData?.content && historyData.content.length > 0)}>
-              <Timeline
-                mode="left"
-                className="pt-2"
-                items={historyData?.content.map((log: ICourseHistoryLog) => {
-                  let dotColor = "blue";
-                  let tagType: TypeTagEnum = TypeTagEnum.WAITING;
-                  if (log.type === "CREATE") {
-                    dotColor = "green";
-                    tagType = TypeTagEnum.SUCCESS;
-                  }
-                  if (log.type === "DELETE") {
-                    dotColor = "red";
-                    tagType = TypeTagEnum.ERROR;
-                  }
-                  if (log.type === "UPDATE") {
-                    dotColor = "gold";
-                    tagType = TypeTagEnum.PROCESSING;
-                  }
-
-                  return {
-                    color: dotColor,
-                    children: (
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <Text className="text-xs text-gray-400">
-                            {formatDateTime(log.createdAt)}
-                          </Text>
-                          <CTag type={tagType} className="m-0 text-[10px] scale-90 origin-right px-1">
-                            {log.type}
-                          </CTag>
-                        </div>
-                        <div>
-                          <Text className="text-sm font-medium text-gray-700">{log.description}</Text>
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          Tác nhân: <span className="font-semibold text-gray-500">{log.createdByName || log.userId || "Hệ thống"}</span>
-                        </div>
-                      </div>
-                    ),
-                  };
-                })}
+              <Table
+                columns={getHistoryColumns()}
+                dataSource={historyData?.content}
+                rowKey="id"
+                pagination={false}
+                size="small"
+                className="border border-gray-100 rounded-lg overflow-hidden"
               />
               <div className="flex justify-center mt-6 pt-4 border-t border-gray-100">
                 <Pagination

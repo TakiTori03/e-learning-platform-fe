@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Row, Col, Space, Typography, Spin, Alert, Card, Badge, Avatar } from "antd";
+import { Row, Col, Alert, Card } from "antd";
 import {
   UsergroupAddOutlined,
   EyeOutlined,
@@ -18,7 +18,6 @@ import { Show } from "@/components/UI/Template";
 import { getColumnsTablePerformance } from "../../constants";
 import { useAuthStore } from "@/store/useAuthStore";
 
-const { Title, Text } = Typography;
 
 const InstructorReportPage: React.FC = () => {
   const user = useAuthStore((state) => state.user);

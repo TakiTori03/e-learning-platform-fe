@@ -8,12 +8,10 @@ import {
   LogoutOutlined,
   HistoryOutlined,
   SettingOutlined,
-  QuestionCircleOutlined,
   KeyOutlined,
   TeamOutlined,
   BookOutlined,
-  MessageOutlined,
-  CreditCardOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import type { IUserInfo } from "@/type";
 import { formatFullName } from "@/utils/format";
@@ -52,14 +50,14 @@ export const getUserMenuItems = (
     label: <Link to="/start">My Learning</Link>,
   },
   {
+    key: "myassignments",
+    icon: <FileTextOutlined />,
+    label: <Link to="/assignments">My Assignments</Link>,
+  },
+  {
     key: "wishlist",
     icon: <HeartOutlined />,
     label: <Link to="/wishlist">Wishlist</Link>,
-  },
-  {
-    key: "inbox",
-    icon: <MessageOutlined />,
-    label: <Link to="/inbox">Inbox</Link>,
   },
   ...(user?.role === "INSTRUCTOR"
     ? [
@@ -84,19 +82,10 @@ export const getUserMenuItems = (
     label: <Link to="/purchase-history">Purchase history</Link>,
   },
   {
-    key: "public-profile",
-    icon: <TeamOutlined />,
-    label: (
-      <Link to={`/public-profile/${user?.id || ""}`}>Public Profile</Link>
-    ),
-  },
-  {
     key: "change-password",
     icon: <KeyOutlined />,
     label: <Link to="/account-settings?tab=password">Change Password</Link>,
   },
-
-  { key: "help", icon: <QuestionCircleOutlined />, label: "Help" },
   { type: "divider" },
   {
     key: "logout",

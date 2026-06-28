@@ -8,6 +8,7 @@ import {
   Typography,
   Divider,
   Tag,
+  Pagination,
 } from "antd";
 import {
   SearchOutlined,
@@ -53,7 +54,7 @@ const { Text, Paragraph } = Typography;
 
 const FeedbackListPage: React.FC = () => {
   const [page, setPage] = useState(1);
-  const [size] = useState(10);
+  const [size, setSize] = useState(10);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
@@ -252,16 +253,27 @@ const FeedbackListPage: React.FC = () => {
           loading={isLoading}
           className="custom-table"
           scroll={{ x: "max-content" }}
-          pagination={{
-            current: page,
-            pageSize: size,
-            total: feedbackData?.totalElements || 0,
-            onChange: (p) => setPage(p),
-            showTotal: TotalTableMessage,
-            showSizeChanger: false,
-          }}
+          pagination={false}
         />
       </div>
+
+      {/* Pagination */}
+      {feedbackData && feedbackData.totalElements > 0 && (
+        <div className="flex justify-end mt-6">
+          <Pagination
+            current={page}
+            pageSize={size}
+            total={feedbackData.totalElements}
+            onChange={(p, s) => {
+              setPage(p);
+              setSize(s);
+            }}
+            showTotal={(total) => `Tổng số ${total} ý kiến phản hồi`}
+            showSizeChanger={true}
+            pageSizeOptions={["10", "20", "50", "100"]}
+          />
+        </div>
+      )}
 
       {/* Detail Modal */}
       <CModal

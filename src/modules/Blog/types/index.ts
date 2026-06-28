@@ -1,4 +1,3 @@
-import type { IUserInfo } from "@/type";
 
 export interface IBlogPostAuthor {
   firstName: string;

@@ -2,9 +2,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { wishlistApi } from "../services";
 import { notification } from "antd";
 import type { ICourse } from "@/type";
+import { useAuthStore } from "@/store/useAuthStore";
 
-export const useWishlist = (courseId?: string) => {
+export const useWishlist = (courseId?: string, options?: { enabledQuery?: boolean }) => {
   const queryClient = useQueryClient();
+  const { isAuth } = useAuthStore();
+  const enabledQuery = options?.enabledQuery ?? true;
 
   // 1. Query to fetch the entire wishlist
   const wishlistQuery = useQuery<ICourse[]>({
@@ -12,19 +15,10 @@ export const useWishlist = (courseId?: string) => {
     queryFn: async () => {
       return await wishlistApi.getWishlist();
     },
+    enabled: isAuth && enabledQuery,
   });
 
-  // 2. Query to check status of a specific course
-  const statusQuery = useQuery<boolean>({
-    queryKey: ["wishlist-status", courseId],
-    queryFn: async () => {
-      if (!courseId) return false;
-      return await wishlistApi.checkWishlistStatus(courseId);
-    },
-    enabled: !!courseId,
-  });
-
-  // 3. Mutation to add to wishlist
+  // 2. Mutation to add to wishlist
   const addMutation = useMutation<void, Error, string>({
     mutationFn: (id: string) => wishlistApi.addToWishlist(id),
     onSuccess: () => {
@@ -34,11 +28,6 @@ export const useWishlist = (courseId?: string) => {
       });
       // Invalidate queries to refresh UI
       queryClient.invalidateQueries({ queryKey: ["wishlist"] });
-      if (courseId) {
-        queryClient.invalidateQueries({
-          queryKey: ["wishlist-status", courseId],
-        });
-      }
     },
     onError: () => {
       notification.error({
@@ -48,7 +37,7 @@ export const useWishlist = (courseId?: string) => {
     },
   });
 
-  // 4. Mutation to remove from wishlist
+  // 3. Mutation to remove from wishlist
   const removeMutation = useMutation<void, Error, string>({
     mutationFn: (id: string) => wishlistApi.removeFromWishlist(id),
     onSuccess: () => {
@@ -58,11 +47,6 @@ export const useWishlist = (courseId?: string) => {
       });
       // Invalidate queries to refresh UI
       queryClient.invalidateQueries({ queryKey: ["wishlist"] });
-      if (courseId) {
-        queryClient.invalidateQueries({
-          queryKey: ["wishlist-status", courseId],
-        });
-      }
     },
     onError: () => {
       notification.error({
@@ -73,12 +57,13 @@ export const useWishlist = (courseId?: string) => {
   });
 
   const wishlistCourses = wishlistQuery.data || [];
+  const isFavorite = courseId ? wishlistCourses.some((c) => c.id === courseId) : false;
 
   return {
     wishlistCourses,
     isLoading: wishlistQuery.isLoading,
-    isFavorite: statusQuery.data ?? false,
-    checkingStatus: statusQuery.isLoading,
+    isFavorite,
+    checkingStatus: wishlistQuery.isFetching,
     addToWishlist: addMutation.mutate,
     removeFromWishlist: removeMutation.mutate,
     isAdding: addMutation.isPending,

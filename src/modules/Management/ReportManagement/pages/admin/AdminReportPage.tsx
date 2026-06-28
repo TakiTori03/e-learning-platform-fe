@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Row, Col, Space, Typography, Spin, Alert, Card, Radio, Tooltip, Badge } from "antd";
+import { Row, Col, Space, Spin, Alert, Card, Radio } from "antd";
 import {
   UsergroupAddOutlined,
   DollarOutlined,
@@ -27,8 +27,6 @@ import { Show } from "@/components/UI/Template";
 import { getColumnsTableProgress, getColumnsTableSales, getColumnsTableOrders } from "../../constants";
 import { theme as globalTheme } from "@/configs/theme";
 import dayjs from "dayjs";
-
-const { Title, Text } = Typography;
 
 const AdminReportPage: React.FC = () => {
   const [dateRangePreset, setDateRangePreset] = useState<string>("30days");
@@ -96,7 +94,6 @@ const AdminReportPage: React.FC = () => {
   // Calculations
   const totalUsers = summaryData?.signupData?.totalSignups || 0;
   const totalRevenue = summaryData?.revenueData?.totalRevenue || 0;
-  const totalCourses = summaryData?.courseData?.totalActiveCourses || 0;
   
   const avgProgress = useMemo(() => {
     if (!progressReport || progressReport.length === 0) return 0;

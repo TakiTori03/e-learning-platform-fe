@@ -39,14 +39,12 @@ export const courseApi = {
   },
 
   getPopularCourses: (limit = 10): Promise<ICourse[]> => {
-    return axiosClient.get<ICourse[]>(`${PREFIX}/courses/popular`, {
-      params: { limit },
-    });
+    return axiosClient.get<ICourse[]>(`${PREFIX}/courses/popular`, { limit });
   },
 
   getRelatedCourses: (courseId: string, limit = 5): Promise<ICourse[]> => {
     return axiosClient.get<ICourse[]>(`${PREFIX}/courses/related/${courseId}`, {
-      params: { limit },
+      limit,
     });
   },
 

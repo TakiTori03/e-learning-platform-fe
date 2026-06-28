@@ -1,8 +1,8 @@
-import { Col, Row, Pagination, Empty } from "antd";
+import { For } from "@/components/UI/Template";
 import type { AnyElement, ICourse } from "@/type";
+import { Col, Empty, Pagination, Row } from "antd";
 import { memo } from "react";
 import CourseCard from "./CourseCard";
-import { For } from "@/components/UI/Template";
 
 interface CourseListProps {
   courses: ICourse[];

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
-import { Form, App, Tooltip, Popconfirm, Pagination } from "antd";
+import { Form, App, Tooltip, Pagination } from "antd";
+import CPopconfirm from "@/components/UI/Popconfirm";
 import { useNavigate } from "react-router-dom";
 import { BookOpen, Edit2, Send, Archive, RotateCcw, Clock } from "lucide-react";
 import type { ICourse } from "@/type";
@@ -145,7 +146,7 @@ export const InstructorCourseList: React.FC = () => {
     if (course.status === CourseStatus.DRAFT || course.status === CourseStatus.REJECTED) {
       actions.push(
         <Tooltip title="Gửi yêu cầu phê duyệt cho Admin" key="submit-review">
-          <Popconfirm
+          <CPopconfirm
             title="Gửi duyệt khóa học?"
             description="Sau khi gửi duyệt, bạn sẽ không thể thay đổi thông tin cho đến khi Admin phản hồi."
             onConfirm={() => toggleActiveMutation.mutate({ id: course.id, status: CourseStatus.PENDING })}
@@ -156,7 +157,7 @@ export const InstructorCourseList: React.FC = () => {
               <Send className="w-4 h-4 mr-1.5 text-green-500" />
               <span className="text-xs font-semibold">Gửi duyệt</span>
             </div>
-          </Popconfirm>
+          </CPopconfirm>
         </Tooltip>
       );
     } else if (course.status === CourseStatus.PENDING) {
@@ -171,9 +172,9 @@ export const InstructorCourseList: React.FC = () => {
     } else if (course.status === CourseStatus.PUBLISHED) {
       actions.push(
         <Tooltip title="Ẩn/Lưu trữ khóa học này" key="archive">
-          <Popconfirm
+          <CPopconfirm
             title="Lưu trữ khóa học này?"
-            description="Khóa học sẽ bị ẩn khỏi học viên và chuyển vào kho lưu trữ."
+            description="Khóa học sẽ bị ẩn khỏi học viên and chuyển vào kho lưu trữ."
             onConfirm={() => toggleActiveMutation.mutate({ id: course.id, status: CourseStatus.ARCHIVED })}
             okText="Xác nhận"
             cancelText="Hủy"
@@ -183,13 +184,13 @@ export const InstructorCourseList: React.FC = () => {
               <Archive className="w-4 h-4 mr-1.5 text-red-500" />
               <span className="text-xs font-semibold">Lưu trữ</span>
             </div>
-          </Popconfirm>
+          </CPopconfirm>
         </Tooltip>
       );
     } else if (course.status === CourseStatus.ARCHIVED) {
       actions.push(
         <Tooltip title="Khôi phục khóa học về trạng thái bản nháp" key="restore">
-          <Popconfirm
+          <CPopconfirm
             title="Khôi phục khóa học này?"
             description="Khóa học sẽ trở về trạng thái Bản nháp để bạn chỉnh sửa."
             onConfirm={() => toggleActiveMutation.mutate({ id: course.id, status: CourseStatus.DRAFT })}
@@ -200,7 +201,7 @@ export const InstructorCourseList: React.FC = () => {
               <RotateCcw className="w-4 h-4 mr-1.5 text-indigo-500" />
               <span className="text-xs font-semibold">Khôi phục</span>
             </div>
-          </Popconfirm>
+          </CPopconfirm>
         </Tooltip>
       );
     }

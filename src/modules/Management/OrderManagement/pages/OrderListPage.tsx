@@ -13,6 +13,7 @@ import {
   Descriptions,
   Row,
   Statistic,
+  Pagination,
 } from "antd";
 import React, { useCallback, useMemo, useState } from "react";
 
@@ -35,7 +36,7 @@ import { useLocalStore } from "../store/useLocalStore";
 
 const OrderListPage: React.FC = () => {
   const [page, setPage] = useState(1);
-  const [size] = useState(10);
+  const [size, setSize] = useState(10);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | undefined>(undefined);
 
@@ -192,16 +193,27 @@ const OrderListPage: React.FC = () => {
           loading={isLoading || updatingStatus}
           className="custom-table"
           scroll={{ x: "max-content" }}
-          pagination={{
-            current: page,
-            pageSize: size,
-            total: ordersData?.totalElements || 0,
-            onChange: (p) => setPage(p),
-            showTotal: TotalTableMessage,
-            showSizeChanger: false,
-          }}
+          pagination={false}
         />
       </div>
+
+      {/* Pagination */}
+      {ordersData && ordersData.totalElements > 0 && (
+        <div className="flex justify-end mt-6">
+          <Pagination
+            current={page}
+            pageSize={size}
+            total={ordersData.totalElements}
+            onChange={(p, s) => {
+              setPage(p);
+              setSize(s);
+            }}
+            showTotal={(total) => `Tổng số ${total} đơn hàng`}
+            showSizeChanger={true}
+            pageSizeOptions={["10", "20", "50", "100"]}
+          />
+        </div>
+      )}
 
       {/* Detail Modal */}
       <CModal

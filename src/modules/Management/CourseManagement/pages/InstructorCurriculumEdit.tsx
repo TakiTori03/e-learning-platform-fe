@@ -6,7 +6,6 @@ import {
   Divider,
   Drawer,
   Form,
-  Popconfirm,
   Progress,
   Radio,
   Row,
@@ -43,6 +42,7 @@ import CTag, { TypeTagEnum } from "@/components/UI/Tag";
 import { For, Show } from "@/components/UI/Template";
 import CTextArea from "@/components/UI/TextArea";
 import VideoPlayerModal from "../components/VideoPlayerModal";
+import CPopconfirm from "@/components/UI/Popconfirm";
 
 // Constants & Types
 import {
@@ -549,7 +549,7 @@ export const InstructorCurriculumEdit: React.FC = () => {
                                 />
                               </Tooltip>
 
-                              <Popconfirm
+                              <CPopconfirm
                                 title="Xóa chương này?"
                                 description="Hành động này sẽ xóa toàn bộ bài học bên trong chương."
                                 onConfirm={() => deleteSectionMutation.mutate(sec.id)}
@@ -565,7 +565,7 @@ export const InstructorCurriculumEdit: React.FC = () => {
                                   onClick={(e) => e.stopPropagation()}
                                   className="rounded-lg hover:bg-red-50"
                                 />
-                              </Popconfirm>
+                              </CPopconfirm>
                             </div>
                           </div>
                         ),
@@ -653,7 +653,7 @@ export const InstructorCurriculumEdit: React.FC = () => {
                                             className="rounded-lg hover:bg-gray-100 flex items-center justify-center"
                                           />
                                         </Tooltip>
-                                        <Popconfirm
+                                        <CPopconfirm
                                           title="Xóa bài học này?"
                                           onConfirm={() => handleDeleteLesson(les.id, sec.id)}
                                           okText="Xóa"
@@ -667,7 +667,7 @@ export const InstructorCurriculumEdit: React.FC = () => {
                                             icon={<Trash2 className="w-4 h-4" />}
                                             className="rounded-lg hover:bg-red-50 flex items-center justify-center"
                                           />
-                                        </Popconfirm>
+                                        </CPopconfirm>
 
                                         <div className="w-[1px] h-4 bg-gray-200 mx-1 hidden sm:block"></div>
 

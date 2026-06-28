@@ -1,4 +1,5 @@
 export const API_PREFIX = {
+  AI: "/ai",
   COURSE: "/course",
   IDENTITY: "/identity",
   INTERACTION: "/interaction",

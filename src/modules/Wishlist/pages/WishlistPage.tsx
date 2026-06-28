@@ -23,13 +23,17 @@ import {
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useWishlist } from "../queryHooks";
+import { useMyLearning } from "@/modules/Learning/queryHooks";
 
 const { Title, Text } = Typography;
 
 export const WishlistPage: React.FC = () => {
   const navigate = useNavigate();
-  const { wishlistCourses, isLoading, removeFromWishlist } = useWishlist();
+  const { wishlistCourses, isLoading: isWishlistLoading, removeFromWishlist } = useWishlist();
+  const { enrolledCourses, isLoading: isMyLearningLoading } = useMyLearning();
   const { addToCart, isInCart } = useCartStore();
+
+  const isLoading = isWishlistLoading || isMyLearningLoading;
 
   if (isLoading) {
     return <LoadingLazy />;
@@ -99,6 +103,10 @@ export const WishlistPage: React.FC = () => {
                   const originalPrice = item.price ?? 0;
                   const salePrice = item.finalPrice ?? originalPrice;
                   const hasDiscount = salePrice < originalPrice;
+                  
+                  // Kiểm tra xem khóa học đã được mua hay chưa
+                  const enrolledCourse = enrolledCourses.find((c) => c.id === item.id);
+                  const isPurchased = item.isBought || !!enrolledCourse;
 
                   return (
                     <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
@@ -119,7 +127,17 @@ export const WishlistPage: React.FC = () => {
                               src={item.thumbnail || "https://via.placeholder.com/400x225"}
                               alt={item.name}
                               className="w-full h-full object-cover transition-transform duration-500 hover:scale-105 cursor-pointer"
-                              onClick={() => navigate(`/courses/${item.id}`)}
+                              onClick={() => {
+                                if (isPurchased) {
+                                  navigate(
+                                    enrolledCourse?.lastAccessedLessonId
+                                      ? `/learning/${item.id}/${enrolledCourse.lastAccessedLessonId}`
+                                      : `/learning/${item.id}`
+                                  );
+                                } else {
+                                  navigate(`/courses/${item.id}`);
+                                }
+                              }}
                             />
                             {/* Remove favorite button (absolute) */}
                             <Tooltip title="Xóa khỏi yêu thích">
@@ -134,13 +152,13 @@ export const WishlistPage: React.FC = () => {
                               </button>
                             </Tooltip>
                             <Show>
-                              <Show.When isTrue={hasDiscount}>
+                              <Show.When isTrue={hasDiscount && !isPurchased}>
                                 <Badge.Ribbon
                                   text="GIẢM GIÁ"
                                   color="red"
                                   className="font-bold text-[10px]"
                                 />
-                              </Show.When>
+                               </Show.When>
                             </Show>
                           </div>
                         }
@@ -150,14 +168,35 @@ export const WishlistPage: React.FC = () => {
                           <Title
                             level={5}
                             className="!m-0 font-bold text-gray-800 line-clamp-2 hover:text-primary transition-colors cursor-pointer min-h-[44px]"
-                            onClick={() => navigate(`/courses/${item.id}`)}
+                            onClick={() => {
+                              if (isPurchased) {
+                                navigate(
+                                  enrolledCourse?.lastAccessedLessonId
+                                    ? `/learning/${item.id}/${enrolledCourse.lastAccessedLessonId}`
+                                    : `/learning/${item.id}`
+                                );
+                              } else {
+                                navigate(`/courses/${item.id}`);
+                              }
+                            }}
                           >
                             {item.name}
                           </Title>
 
                           {/* Instructor Info */}
-                          <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-                            <UserOutlined className="text-[10px]" />
+                          <div className="flex items-center gap-2 text-gray-500 text-xs">
+                            <Show>
+                              <Show.When isTrue={!!item.instructor?.avatar}>
+                                <img
+                                  src={item.instructor?.avatar}
+                                  alt={formatFullName(item.instructor)}
+                                  className="w-5 h-5 rounded-full object-cover border border-gray-200 shrink-0"
+                                />
+                              </Show.When>
+                              <Show.Else>
+                                <UserOutlined className="text-[10px]" />
+                              </Show.Else>
+                            </Show>
                             <span className="line-clamp-1">
                               <Show>
                                 <Show.When isTrue={!!item.instructor}>
@@ -183,18 +222,27 @@ export const WishlistPage: React.FC = () => {
 
                           {/* Pricing */}
                           <div className="flex flex-wrap items-baseline gap-2 mt-2">
-                            <span className="text-primary font-extrabold text-sm">
-                              <Show>
-                                <Show.When isTrue={salePrice === 0}>Miễn phí</Show.When>
-                                <Show.Else>{formatPrice(salePrice)}</Show.Else>
-                              </Show>
-                            </span>
                             <Show>
-                              <Show.When isTrue={hasDiscount}>
-                                <span className="text-gray-400 line-through text-[11px]">
-                                  {formatPrice(originalPrice)}
+                              <Show.When isTrue={isPurchased}>
+                                <span className="text-green-600 font-bold text-xs bg-green-50 px-2 py-0.5 rounded">
+                                  Đã sở hữu
                                 </span>
                               </Show.When>
+                              <Show.Else>
+                                <span className="text-primary font-extrabold text-sm">
+                                  <Show>
+                                    <Show.When isTrue={salePrice === 0}>Miễn phí</Show.When>
+                                    <Show.Else>{formatPrice(salePrice)}</Show.Else>
+                                  </Show>
+                                </span>
+                                <Show>
+                                  <Show.When isTrue={hasDiscount}>
+                                    <span className="text-gray-400 line-through text-[11px]">
+                                      {formatPrice(originalPrice)}
+                                    </span>
+                                  </Show.When>
+                                </Show>
+                              </Show.Else>
                             </Show>
                           </div>
                         </div>
@@ -202,27 +250,47 @@ export const WishlistPage: React.FC = () => {
                         {/* Action Button */}
                         <div className="mt-4 border-t pt-3">
                           <Show>
-                            <Show.When isTrue={isAddedToCart}>
-                              <CButton
-                                type="dashed"
-                                block
-                                icon={<ShoppingCartOutlined />}
-                                className="rounded-xl font-bold flex items-center justify-center gap-1.5 border-primary text-primary hover:text-primary/90"
-                                onClick={() => navigate("/cart")}
-                              >
-                                Xem giỏ hàng
-                              </CButton>
-                            </Show.When>
-                            <Show.Else>
+                            <Show.When isTrue={isPurchased}>
                               <CButton
                                 type="primary"
                                 block
-                                icon={<ShoppingCartOutlined />}
-                                className="rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all duration-200"
-                                onClick={() => addToCart(item.id)}
+                                className="rounded-xl font-bold flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white border-none shadow-sm transition-all duration-200"
+                                onClick={() =>
+                                  navigate(
+                                    enrolledCourse?.lastAccessedLessonId
+                                      ? `/learning/${item.id}/${enrolledCourse.lastAccessedLessonId}`
+                                      : `/learning/${item.id}`
+                                  )
+                                }
                               >
-                                Thêm vào giỏ hàng
+                                Vào học
                               </CButton>
+                            </Show.When>
+                            <Show.Else>
+                              <Show>
+                                <Show.When isTrue={isAddedToCart}>
+                                  <CButton
+                                    type="dashed"
+                                    block
+                                    icon={<ShoppingCartOutlined />}
+                                    className="rounded-xl font-bold flex items-center justify-center gap-1.5 border-primary text-primary hover:text-primary/90"
+                                    onClick={() => navigate("/cart")}
+                                  >
+                                    Xem giỏ hàng
+                                  </CButton>
+                                </Show.When>
+                                <Show.Else>
+                                  <CButton
+                                    type="primary"
+                                    block
+                                    icon={<ShoppingCartOutlined />}
+                                    className="rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all duration-200"
+                                    onClick={() => addToCart(item.id)}
+                                  >
+                                    Thêm vào giỏ hàng
+                                  </CButton>
+                                </Show.Else>
+                              </Show>
                             </Show.Else>
                           </Show>
                         </div>

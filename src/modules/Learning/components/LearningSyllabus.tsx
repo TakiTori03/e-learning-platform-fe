@@ -1,14 +1,17 @@
-import { Collapse } from "antd";
+import { For } from "@/components/UI/Template";
+import { LessonType } from "@/constants/enums";
+import type { ILesson, ISection } from "@/type";
 import {
   CheckCircleFilled,
-  PlayCircleOutlined,
+  EditOutlined,
   FileTextOutlined,
+  PlayCircleOutlined,
+  QuestionCircleOutlined,
 } from "@ant-design/icons";
+import { Collapse } from "antd";
+import { memo, useState, useEffect, useMemo } from "react";
 import { useLearningStore } from "../store/useLearningStore";
-import { memo } from "react";
-import type { ILesson, ISection } from "@/type";
-import { LessonType } from "@/constants/enums";
-import { For, Show } from "@/components/UI/Template";
+import { formatDuration } from "@/utils/format";
 
 interface LearningSyllabusProps {
   sections: ISection[];
@@ -25,25 +28,42 @@ const getLessonIcon = (type: LessonType | string, isActive: boolean) => {
       return <PlayCircleOutlined className={activeClass} />;
     case LessonType.DOCUMENT:
       return <FileTextOutlined className={activeClass} />;
+    case LessonType.QUIZ:
+      return <QuestionCircleOutlined className={activeClass} />;
+    case LessonType.ASSIGNMENT:
+      return <EditOutlined className={activeClass} />;
     default:
       return <PlayCircleOutlined className={activeClass} />;
   }
 };
 
 const getLessonMeta = (lesson: ILesson) => {
+  const isYoutube = !!(
+    lesson.content &&
+    (lesson.content.includes("youtube.com") || lesson.content.includes("youtu.be"))
+  );
+  if (isYoutube) {
+    return (
+      <span className="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wider border border-blue-100/60 select-none">
+        Preview
+      </span>
+    );
+  }
+
   const videoLengthInSeconds = Math.round(lesson.videoLength || 0);
   switch (lesson.type) {
     case LessonType.VIDEO:
       return (
-        <span className="flex items-center gap-1">
-          <span>
-            {Math.floor(videoLengthInSeconds / 60)}:
-            {(videoLengthInSeconds % 60).toString().padStart(2, "0")}
-          </span>
+        <span className="flex items-center gap-1 font-mono">
+          <span>{formatDuration(videoLengthInSeconds)}</span>
         </span>
       );
     case LessonType.DOCUMENT:
       return <span>Tài liệu</span>;
+    case LessonType.QUIZ:
+      return <span>Trắc nghiệm</span>;
+    case LessonType.ASSIGNMENT:
+      return <span>Bài tập</span>;
     default:
       return null;
   }
@@ -58,6 +78,28 @@ const LearningSyllabus = ({
 }: LearningSyllabusProps) => {
   const currentLesson = useLearningStore((state) => state.currentLesson);
   const lessonsDoneIds = useLearningStore((state) => state.lessonsDoneIds);
+
+  // Tìm sectionId của bài học hiện tại
+  const currentLessonSectionId = useMemo(() => {
+    if (!currentLesson) return null;
+    const found = lessons.find((l) => l.id === currentLesson.id);
+    return found?.sectionId || currentLesson.sectionId || null;
+  }, [currentLesson, lessons]);
+
+  // Quản lý các sections đang mở
+  const [activeKeys, setActiveKeys] = useState<string[]>(() => {
+    return sections[0] ? [sections[0].id] : [];
+  });
+
+  // Tự động mở rộng section chứa bài học hiện tại khi vào trang hoặc chuyển bài
+  useEffect(() => {
+    if (currentLessonSectionId) {
+      setActiveKeys((prev) => {
+        if (prev.includes(currentLessonSectionId)) return prev;
+        return [...prev, currentLessonSectionId];
+      });
+    }
+  }, [currentLessonSectionId]);
 
   const getLessonsBySection = (sectionId: string) => {
     const section = sections.find((s) => s.id === sectionId);
@@ -102,16 +144,12 @@ const LearningSyllabus = ({
                   }`}
                   onClick={() => onLessonSelect(lesson)}
                 >
-                  <div className="flex-shrink-0">
-                    <Show>
-                      <Show.When isTrue={isDone}>
-                        <CheckCircleFilled className="text-emerald-500 text-sm" />
-                      </Show.When>
-                      <Show.Else>
-                        {getLessonIcon(lesson.type, isActive)}
-                      </Show.Else>
-                    </Show>
+                  {/* Left: Lesson type icon is ALWAYS shown */}
+                  <div className="flex-shrink-0 flex items-center justify-center w-5">
+                    {getLessonIcon(lesson.type, isActive)}
                   </div>
+
+                  {/* Center: Lesson details */}
                   <div className="flex-1 min-w-0">
                     <span
                       className={`block truncate text-xs font-semibold ${
@@ -124,7 +162,13 @@ const LearningSyllabus = ({
                       {getLessonMeta(lesson)}
                     </div>
                   </div>
-                  {/* Removed misleading LockOutlined icon for enrolled students */}
+
+                  {/* Right: Completed checkmark icon */}
+                  {isDone && (
+                    <div className="flex-shrink-0 ml-2">
+                      <CheckCircleFilled className="text-emerald-500 text-[13px]" />
+                    </div>
+                  )}
                 </div>
               );
             }}
@@ -159,7 +203,8 @@ const LearningSyllabus = ({
         <Collapse
           ghost
           expandIconPlacement="end"
-          defaultActiveKey={sections[0]?.id}
+          activeKey={activeKeys}
+          onChange={(keys) => setActiveKeys(keys as string[])}
           className="learning-collapse"
           items={collapseItems}
         />

@@ -7,12 +7,12 @@ import GlobalChatbotWidget from "@/components/AI/GlobalChatbotWidget";
 
 const ClientLayout: React.FC = React.memo(() => {
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-white w-full max-w-full overflow-x-clip">
       {/* 1. Header cố định ở trên */}
       <Header />
 
       {/* 2. Nội dung thay đổi theo trang */}
-      <main className="flex-grow">
+      <main className="flex-grow pt-[68px]">
         <Outlet />
       </main>
 

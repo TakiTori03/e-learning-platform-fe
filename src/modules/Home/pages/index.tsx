@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 import { useHome } from "../hooks/useHome";
 import { useAuthStore } from "@/store/useAuthStore";
 import HomeHero from "../components/HomeHero";
@@ -14,7 +14,7 @@ import { Show } from "@/components/UI/Template";
 
 export const HomePage: React.FC = () => {
   const isAuth = useAuthStore((state) => state.isAuth);
-  const { categories, popularCourses, myCourses, blogs, isLoading, subscribe, isSubscribing } = useHome();
+  const { popularCourses, myCourses, blogs, isLoading, subscribe, isSubscribing } = useHome();
 
   const handleSubscribe = (email: string) => {
     subscribe(email);

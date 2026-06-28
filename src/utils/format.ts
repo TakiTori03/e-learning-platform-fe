@@ -57,3 +57,13 @@ export const formatFullName = (
   if (!f && !l) return fallback;
   return `${f} ${l}`.trim();
 };
+
+// Format tổng thời lượng học từ giây sang chuỗi tiếng Việt (ví dụ: 7200 giây -> 2 giờ)
+export const formatStudyTime = (seconds?: number): string => {
+  if (!seconds || seconds <= 0) return "0 giờ";
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.round((seconds % 3600) / 60);
+  if (hours === 0) return `${minutes} phút`;
+  if (minutes === 0) return `${hours} giờ`;
+  return `${hours} giờ ${minutes} phút`;
+};

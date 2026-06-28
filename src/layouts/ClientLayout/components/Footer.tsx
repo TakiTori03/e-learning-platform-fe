@@ -101,13 +101,6 @@ export const Footer: React.FC = React.memo(() => {
                 Blog
               </Link>
               <Link
-                to="/about-us"
-                style={footerLinkStyle}
-                className="hover:text-white"
-              >
-                About us
-              </Link>
-              <Link
                 to="/mentors"
                 style={footerLinkStyle}
                 className="hover:text-white"

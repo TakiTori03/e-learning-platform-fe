@@ -168,6 +168,7 @@ export interface ICourse extends IBase {
   requirements?: string[];
   tags?: string[];
   isBought?: boolean;
+  isFavorite?: boolean;
   progress?: number;
   isCompleted?: boolean;
   completedAt?: string | null;

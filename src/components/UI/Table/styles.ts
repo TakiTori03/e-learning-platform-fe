@@ -35,16 +35,14 @@ export const StyledCommonTable = styled(Table)`
 
   .ant-pagination {
     margin-bottom: 11px !important;
+    width: 100%;
     &-total-text {
       font-weight: 500;
       line-height: 22px;
       font-size: 14px;
       color: ${({ theme }) => theme.contentPlaceholder};
+      margin-right: auto;
     }
-  }
-  .ant-pagination-options {
-    position: absolute;
-    left: 0;
   }
   .ant-table-row.row-has-color {
     background-color: ${({ theme }) => theme.tableSelectedActive};

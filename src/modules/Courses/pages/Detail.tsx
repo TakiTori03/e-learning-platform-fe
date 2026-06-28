@@ -1,18 +1,20 @@
-import { useParams, Link } from "react-router-dom";
-import { Typography, Row, Col, Tabs } from "antd";
-import { useCourseDetail } from "../queryHooks";
-import Syllabus from "../components/Syllabus";
+import { Col, Row, Tabs, Typography } from "antd";
 import { memo, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+import Syllabus from "../components/Syllabus";
+import { useCourseDetail } from "../queryHooks";
 import { courseApi } from "../services";
 
 import LoadingLazy from "@/components/UI/LoadingLazy";
 
 // Reusable Modular Sub-components
 import CourseHero from "../components/CourseHero";
-import CourseWillLearn from "../components/CourseWillLearn";
 import CourseRequirements from "../components/CourseRequirements";
-import InstructorProfile from "../components/InstructorProfile";
 import CourseReviewsSection from "../components/CourseReviewsSection";
+import CourseWillLearn from "../components/CourseWillLearn";
+import InstructorProfile from "../components/InstructorProfile";
+import CoursePricingCard from "../components/CoursePricingCard";
+import RelatedCourses from "../components/RelatedCourses";
 
 const { Title, Paragraph } = Typography;
 
@@ -47,14 +49,14 @@ const CourseDetailPage = () => {
     {
       key: "syllabus",
       label: "Nội dung khóa học",
-      children: <Syllabus sections={sections} />,
+      children: <Syllabus sections={sections} isBought={course.isBought} courseId={course.id} />,
     },
     {
       key: "description",
       label: "Mô tả chi tiết",
       children: (
-        <div className="py-6">
-          <Paragraph className="text-lg leading-relaxed whitespace-pre-wrap text-gray-600">
+        <div className="py-6 font-sans">
+          <Paragraph className="text-base leading-relaxed whitespace-pre-wrap text-gray-600">
             {course.description}
           </Paragraph>
         </div>
@@ -81,26 +83,42 @@ const CourseDetailPage = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* 1. Dark Top Banner (Hero & Pricing Card) */}
+      {/* 1. Header chi tiết khóa học - Dải đen full width */}
       <CourseHero course={course} />
 
-      {/* 2. Course Body Content */}
-      <div className="container mx-auto px-4 py-16 lg:py-24">
-        <Row gutter={[64, 64]}>
+      <div className="container mx-auto px-4 py-8 lg:py-12">
+        <Row gutter={[48, 48]}>
+          {/* Cột trái (Nội dung chính) */}
           <Col xs={24} lg={16}>
-            {/* 2.1. Objectives / What you will learn */}
+            {/* Mobile-only Pricing Card (Chỉ hiện dưới màn hình lg) */}
+            <div className="block lg:hidden my-6">
+              <CoursePricingCard course={course} />
+            </div>
+
+            {/* 2. Bạn sẽ học được gì */}
             <CourseWillLearn willLearns={course.willLearns} />
 
-            {/* 2.2. Requirements */}
+            {/* 3. Yêu cầu khóa học */}
             <CourseRequirements requirements={course.requirements} />
 
-            {/* 2.3. Core Curriculum / Syllabus / Bio Tabs */}
+            {/* 4. Nội dung chi tiết các tab */}
             <div className="detail-tabs-container mb-12">
               <Tabs
                 items={tabItems}
                 defaultActiveKey="syllabus"
-                className="premium-tabs"
+                className="premium-tabs font-sans"
               />
+            </div>
+
+            {/* 5. Khóa học liên quan */}
+            <RelatedCourses courseId={course.id} />
+          </Col>
+
+          <Col xs={24} lg={8} className="hidden lg:block">
+            <div className="sticky top-[calc(50%+34px)] transform -translate-y-1/2 z-30 flex justify-center lg:-mt-[180px]">
+              <div className="w-full max-w-[390px]">
+                <CoursePricingCard course={course} />
+              </div>
             </div>
           </Col>
         </Row>

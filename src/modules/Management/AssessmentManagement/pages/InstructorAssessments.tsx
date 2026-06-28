@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Table, Space, Button, Popconfirm, Card, Typography, Tag, Tooltip, Input, Select, Empty } from "antd";
+import { Table, Space, Button, Card, Typography, Tag, Tooltip, Input, Select, Empty } from "antd";
+import CPopconfirm from "@/components/UI/Popconfirm";
 import {
   Plus,
   Edit2,
@@ -14,6 +15,7 @@ import {
   Search,
   FileQuestion,
   RotateCcw,
+  Eye,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "@/components/UI/PageHeader";
@@ -22,11 +24,20 @@ import { pathRoutes } from "@/constants/routes";
 import { useInstructorQuizzes, useDeleteQuizMutation } from "../queryHooks/useQuizHooks";
 import { useAllInstructorCourses } from "@/modules/Management/CourseManagement/queryHooks/useCourseHooks";
 import type { IQuiz } from "../types";
+import QuizReviewModal from "@/modules/Learning/components/QuizReviewModal";
 
 const { Text } = Typography;
 
 const InstructorAssessments: React.FC = () => {
   const navigate = useNavigate();
+
+  const [selectedQuiz, setSelectedQuiz] = useState<IQuiz | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const handlePreviewQuiz = (quiz: IQuiz) => {
+    setSelectedQuiz(quiz);
+    setIsPreviewOpen(true);
+  };
   
   // States for search and filter
   const [searchVal, setSearchVal] = useState("");
@@ -197,6 +208,15 @@ const InstructorAssessments: React.FC = () => {
       key: "actions",
       render: (_: any, record: IQuiz) => (
         <Space size="small">
+          <Tooltip title="Xem trước đề thi">
+            <Button
+              type="text"
+              icon={<Eye size={15} className="text-gray-500 group-hover:text-emerald-600 transition-colors" />}
+              className="hover:bg-emerald-50 rounded-lg h-9 w-9 flex items-center justify-center border border-transparent hover:border-emerald-100 group transition-all"
+              onClick={() => handlePreviewQuiz(record)}
+            />
+          </Tooltip>
+
           <Tooltip title="Chỉnh sửa đề thi">
             <Button
               type="text"
@@ -207,7 +227,7 @@ const InstructorAssessments: React.FC = () => {
           </Tooltip>
 
           <Tooltip title={record.lessonId ? "Không thể xóa đề thi đã liên kết bài học" : "Xóa đề thi"}>
-            <Popconfirm
+            <CPopconfirm
               title="Bạn chắc chắn muốn xóa đề thi này khỏi ngân hàng đề?"
               description="Hành động này không thể khôi phục."
               onConfirm={() => handleDelete(record.id)}
@@ -223,7 +243,7 @@ const InstructorAssessments: React.FC = () => {
                 disabled={!!record.lessonId}
                 className="hover:bg-red-50 disabled:hover:bg-transparent rounded-lg h-9 w-9 flex items-center justify-center border border-transparent disabled:opacity-30 disabled:border-transparent transition-all"
               />
-            </Popconfirm>
+            </CPopconfirm>
           </Tooltip>
         </Space>
       ),
@@ -376,6 +396,16 @@ const InstructorAssessments: React.FC = () => {
           }}
         />
       </Card>
+
+      <QuizReviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => {
+          setIsPreviewOpen(false);
+          setSelectedQuiz(null);
+        }}
+        quiz={selectedQuiz}
+        mode="instructor"
+      />
     </div>
   );
 };

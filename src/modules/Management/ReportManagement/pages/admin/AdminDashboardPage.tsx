@@ -1,5 +1,5 @@
 import React, { useState, useMemo, memo } from "react";
-import { Row, Col, Avatar, Space, Typography, Spin, Alert, Empty } from "antd";
+import { Row, Col, Space, Typography, Spin, Alert, Empty } from "antd";
 import {
   UsergroupAddOutlined,
   DollarOutlined,

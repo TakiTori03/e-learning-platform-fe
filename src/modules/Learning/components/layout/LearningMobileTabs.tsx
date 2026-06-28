@@ -10,6 +10,7 @@ interface LearningMobileTabsProps {
   sections: ISection[];
   lessons: ILesson[];
   currentLessonId?: string;
+  currentLesson?: ILesson | null;
   handleLessonSelect: (lesson: ILesson) => void;
   isMobile: boolean;
 }
@@ -20,6 +21,7 @@ const LearningMobileTabs: React.FC<LearningMobileTabsProps> = ({
   sections,
   lessons,
   currentLessonId,
+  currentLesson,
   handleLessonSelect,
   isMobile,
 }) => {
@@ -37,6 +39,7 @@ const LearningMobileTabs: React.FC<LearningMobileTabsProps> = ({
     sections,
     lessons,
     currentLessonId,
+    currentLesson,
     handleLessonSelect,
     true, // isMobile = true for mobile tabs
     activeTab

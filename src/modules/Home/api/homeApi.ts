@@ -12,19 +12,8 @@ export const homeApi = {
     );
   },
 
-  getPopularCourses: (params?: Partial<IParamsRequest>) => {
-    return axiosClient.get<IListResponse<ICourse>>(`${PREFIX}/courses/search`, {
-      sort: "views,desc",
-      size: 8,
-      ...params,
-    });
-  },
-
-  getHomeCourses: (params?: Partial<IParamsRequest>) => {
-    return axiosClient.get<IListResponse<ICourse>>(
-      `${PREFIX}/courses/search`,
-      params
-    );
+  getPopularCourses: (limit = 8) => {
+    return axiosClient.get<ICourse[]>(`${PREFIX}/courses/popular`, { limit });
   },
 
   createSubscription: (email: string) => {

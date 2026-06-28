@@ -46,7 +46,7 @@ export const useHome = () => {
 
   return {
     categories: categoriesQuery.data?.content || [],
-    popularCourses: popularCoursesQuery.data?.content || [],
+    popularCourses: popularCoursesQuery.data || [],
     myCourses: myCoursesQuery.data || [],
     blogs: blogsQuery.data?.content || [],
     isLoading:

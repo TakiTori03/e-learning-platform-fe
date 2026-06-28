@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { courseApi } from "../services";
 import { useAuthStore } from "@/store/useAuthStore";
-import type { AnyElement, ICourse, IParamsRequest, IListResponse, ISection } from "@/type";
+import type { AnyElement, ICourse, IParamsRequest, IListResponse } from "@/type";
 
 export const useCourses = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -95,18 +95,20 @@ export const useCourseDetail = (courseId: string) => {
     enabled: !!courseId,
   });
 
-  const syllabusQuery = useQuery<ISection[]>({
-    queryKey: ["course-syllabus", courseId],
-    queryFn: () => courseApi.getSectionsByCourseId(courseId),
-    enabled: !!courseId,
-  });
-
   return {
     course: detailQuery.data,
-    sections: syllabusQuery.data || [],
-    isLoading: detailQuery.isLoading || syllabusQuery.isLoading,
-    isError: detailQuery.isError || syllabusQuery.isError,
+    sections: detailQuery.data?.sections || [],
+    isLoading: detailQuery.isLoading,
+    isError: detailQuery.isError,
   };
+};
+
+export const useRelatedCourses = (courseId: string, limit = 4) => {
+  return useQuery<ICourse[]>({
+    queryKey: ["related-courses", courseId, limit],
+    queryFn: () => courseApi.getRelatedCourses(courseId, limit),
+    enabled: !!courseId,
+  });
 };
 
 export const useAllCategories = () => {

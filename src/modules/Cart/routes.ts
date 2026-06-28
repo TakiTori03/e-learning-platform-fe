@@ -8,6 +8,6 @@ export const routes: RouterConfig[] = [
     path: "/cart",
     page: createElement(CartPage),
     layout: "client",
-    isProtected: true,
+    isProtected: false,
   },
 ];

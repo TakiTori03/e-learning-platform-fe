@@ -23,6 +23,7 @@ export const pathRoutes = {
   accountSettings: "/account-settings",
   purchaseHistory: "/purchase-history",
   wishlist: "/wishlist",
+  assignments: "/assignments",
   changePassword: "/change-password",
   paymentHistory: "/payment-history",
   publicProfile: "/publicprofile",

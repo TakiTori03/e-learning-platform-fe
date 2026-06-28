@@ -1,9 +1,8 @@
 import React from "react";
-import { Card, Typography, Rate, Tag } from "antd";
+import { Card, Typography, Rate } from "antd";
 import { Eye, Users, FolderOpen } from "lucide-react";
 import type { ICourse } from "@/type";
 import CourseStatusTag from "./CourseStatusTag";
-import { CourseStatus } from "@/constants/enums";
 import { formatPrice } from "../constants";
 
 const { Title, Text, Paragraph } = Typography;
@@ -74,7 +73,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, actions }) => {
         </div>
 
         {/* Subtitle / Description */}
-        <Paragraph className="text-xs text-gray-400 line-clamp-2 mb-2 leading-relaxed h-8 flex-none">
+        <Paragraph className="text-xs text-gray-400 line-clamp-2 mb-2 leading-relaxed h-10 flex-none">
           {course.subTitle}
         </Paragraph>
 

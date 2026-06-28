@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Form, Input, InputNumber, Switch, Button, Card, Space, Divider, Radio, Checkbox, Row, Col, Typography, App, Spin } from "antd";
-import { Save, ArrowLeft, Plus, Trash2, HelpCircle } from "lucide-react";
+import { Form, Input, InputNumber, Switch, Button, Card, Divider, Radio, Checkbox, Row, Col, Typography, App, Spin } from "antd";
+import { Save, Plus, Trash2 } from "lucide-react";
 import PageHeader from "@/components/UI/PageHeader";
 import { pathRoutes } from "@/constants/routes";
 import { useQuizDetail, useCreateQuizMutation, useUpdateQuizMutation } from "../queryHooks/useQuizHooks";
 import type { IQuiz, IQuestion, IAnswerOption } from "../types";
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const QuizBuilder: React.FC = () => {

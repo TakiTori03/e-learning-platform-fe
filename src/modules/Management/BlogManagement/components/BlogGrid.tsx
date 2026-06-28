@@ -50,16 +50,7 @@ const BlogGrid: React.FC<BlogGridProps> = ({
               </p>
             </div>
           }
-        >
-          {onCreateNewClick && (
-            <button
-              onClick={onCreateNewClick}
-              className="mt-2 text-sm font-semibold text-blue-600 hover:text-blue-500 transition-colors"
-            >
-              Viết bài mới
-            </button>
-          )}
-        </Empty>
+        />
       </Card>
     );
   }

@@ -8,7 +8,8 @@ import {
   UserSwitchOutlined,
 } from "@ant-design/icons";
 import type { Breakpoint } from "antd";
-import { Avatar, Popconfirm, Space, Tag, Tooltip, Typography } from "antd";
+import { Avatar, Space, Tag, Tooltip, Typography } from "antd";
+import CPopconfirm from "@/components/UI/Popconfirm";
 import UserStatusTag from "../components/UserStatusTag";
 
 const { Text } = Typography;
@@ -123,7 +124,7 @@ export const getColumnsTableUserManagement = ({
 
           {/* Toggle Lock / Unlock Account */}
           {isLocked ? (
-            <Popconfirm
+            <CPopconfirm
               title="Mở khóa tài khoản?"
               description={`Bạn có chắc muốn mở khóa cho tài khoản "${record.email}"?`}
               onConfirm={() => onToggleStatus(record, UserStatus.ACTIVE)}
@@ -138,9 +139,9 @@ export const getColumnsTableUserManagement = ({
                   icon={<CheckCircleOutlined className="text-green-500" />}
                 />
               </Tooltip>
-            </Popconfirm>
+            </CPopconfirm>
           ) : (
-            <Popconfirm
+            <CPopconfirm
               title="Khóa tài khoản này?"
               description={`Tài khoản "${record.email}" sẽ không thể đăng nhập cho tới khi được mở khóa.`}
               onConfirm={() => onToggleStatus(record, UserStatus.LOCKED)}
@@ -156,7 +157,7 @@ export const getColumnsTableUserManagement = ({
                   danger
                 />
               </Tooltip>
-            </Popconfirm>
+            </CPopconfirm>
           )}
         </Space>
       );
@@ -238,7 +239,7 @@ export const getColumnsTableInstructorReview = ({
     render: (_: unknown, record: IUserInfo) => (
       <Space size="small">
         {/* Approve Button */}
-        <Popconfirm
+        <CPopconfirm
           title="Duyệt giảng viên này?"
           description="Tài khoản giảng viên sẽ được kích hoạt hoạt động và gửi thông báo qua email."
           onConfirm={() => onApprove(record.id)}
@@ -254,10 +255,10 @@ export const getColumnsTableInstructorReview = ({
           >
             Duyệt hồ sơ
           </CButton>
-        </Popconfirm>
+        </CPopconfirm>
 
         {/* Reject Button */}
-        <Popconfirm
+        <CPopconfirm
           title="Từ chối hồ sơ này?"
           description="Ứng viên sẽ bị chuyển về trạng thái Không hoạt động."
           onConfirm={() => onReject(record.id)}
@@ -274,7 +275,7 @@ export const getColumnsTableInstructorReview = ({
           >
             Từ chối
           </CButton>
-        </Popconfirm>
+        </CPopconfirm>
       </Space>
     ),
   },

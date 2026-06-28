@@ -215,9 +215,9 @@ export const CPagination = styled(Pagination)`
   display: flex;
   justify-content: flex-end;
   position: relative;
-  .ant-pagination-options {
-    position: absolute;
-    left: 0;
+  width: 100%;
+  .ant-pagination-total-text {
+    margin-right: auto;
   }
 `;
 

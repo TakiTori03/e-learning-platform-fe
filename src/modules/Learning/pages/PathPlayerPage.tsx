@@ -8,12 +8,12 @@ import { LessonType } from "@/constants/enums";
 import {
   AutoplayOverlay,
   CelebrationModal,
-  LessonControls,
   LessonDescription,
   LessonMetadata,
 } from "../components/path-player";
 import PlayerScreen from "../components/PlayerScreen";
 import { useLearning } from "../queryHooks";
+import { BookOpen, ArrowLeft } from "lucide-react";
 
 export const PathPlayerPage: React.FC = () => {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId?: string }>();
@@ -127,11 +127,12 @@ export const PathPlayerPage: React.FC = () => {
   const handleLessonCompleteWithAutoNext = useCallback(
     (completedId: string) => {
       handleLessonComplete(completedId);
-      if (hasPathNext && !isAutoplayCancelled) {
+      // Chỉ tự động đếm ngược nhảy bài nếu bài học hiện tại là VIDEO
+      if (currentLesson?.type === LessonType.VIDEO && hasPathNext && !isAutoplayCancelled) {
         setNextLessonCountdown(5); // Start 5s countdown to autoplay next lesson
       }
     },
-    [handleLessonComplete, hasPathNext, isAutoplayCancelled]
+    [handleLessonComplete, currentLesson?.type, hasPathNext, isAutoplayCancelled]
   );
 
   if (isLoading) return <LoadingLazy />;
@@ -143,20 +144,41 @@ export const PathPlayerPage: React.FC = () => {
           Không tìm thấy khóa học hoặc bạn chưa đăng ký.
         </div>
       </Show.When>
-  <Show.When isTrue={lessons.length === 0}>
-        <div className="min-h-[80vh] flex flex-col items-center justify-center p-6 text-center">
-          <div className="max-w-md bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-            <span className="text-5xl mb-4 block">📚</span>
-            <h2 className="text-xl font-bold text-slate-800">Khóa học chưa có bài học</h2>
-            <p className="text-slate-500 mt-2 text-sm leading-relaxed">
-              Khóa học "{course?.name}" hiện tại chưa được cập nhật bài học nào. Vui lòng quay lại sau hoặc liên hệ với giảng viên để biết thêm chi tiết.
+      <Show.When isTrue={lessons.length === 0}>
+        <div className="min-h-screen w-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 via-slate-100 to-blue-50/20 relative overflow-hidden">
+          {/* Subtle background glow blobs */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-400/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="max-w-lg w-full bg-white/80 backdrop-blur-md border border-white/60 p-10 rounded-3xl shadow-xl shadow-slate-200/40 text-center relative z-10 hover:-translate-y-1 transition-all duration-300">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 text-white flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/25">
+              <BookOpen size={28} />
+            </div>
+            
+            <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-3">
+              Khóa học chưa có bài giảng
+            </h2>
+            
+            <p className="text-slate-500 text-sm leading-relaxed px-4">
+              Khóa học <strong className="text-slate-700">"{course?.name}"</strong> đang được xây dựng hoặc đang trong quá trình chuẩn bị bài giảng. Vui lòng quay lại sau hoặc trao đổi với giảng viên để biết thêm chi tiết.
             </p>
-            <button
-              onClick={() => navigate(`/courses/${courseId}`)}
-              className="mt-6 px-5 py-2.5 bg-primary text-white font-medium rounded-lg text-sm transition-all hover:bg-primary/90 shadow-sm"
-            >
-              Quay lại trang chi tiết khóa học
-            </button>
+
+            <div className="mt-8 space-y-3 px-4">
+              <button
+                onClick={() => navigate(`/courses/${courseId}`)}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl text-sm transition-all hover:opacity-95 hover:scale-[1.02] hover:shadow-lg hover:shadow-indigo-500/15 active:scale-[0.98]"
+              >
+                <ArrowLeft size={16} />
+                Quay lại chi tiết khóa học
+              </button>
+              
+              <button
+                onClick={() => navigate("/courses")}
+                className="w-full py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold rounded-xl text-sm transition-all border border-slate-200/80 active:scale-[0.98]"
+              >
+                Khám phá các khóa học khác
+              </button>
+            </div>
           </div>
         </div>
       </Show.When>
@@ -167,7 +189,13 @@ export const PathPlayerPage: React.FC = () => {
           sections={course?.sections || []}
           lessons={lessons}
           currentLessonId={currentLesson?.id}
+          currentLesson={currentLesson}
+          currentLessonIndex={currentLessonIndex}
           handleLessonSelect={handleLessonSelect}
+          hasPathPrev={hasPathPrev}
+          hasPathNext={hasPathNext}
+          goToPrevLesson={goToPrevLesson}
+          goToNextLesson={goToNextLesson}
         >
           <Show>
             <Show.When isTrue={currentLesson?.type === LessonType.VIDEO}>
@@ -203,17 +231,10 @@ export const PathPlayerPage: React.FC = () => {
 
               {/* Lesson Metadata Area */}
               <div className="px-6 py-8 md:px-10 max-w-[960px] mx-auto w-full flex-1">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/80 pb-6 mb-8">
+                <div className="border-b border-slate-200/80 pb-6 mb-8">
                   <LessonMetadata
                     currentLessonIndex={currentLessonIndex}
                     currentLesson={currentLesson}
-                  />
-
-                  <LessonControls
-                    hasPathPrev={hasPathPrev}
-                    hasPathNext={hasPathNext}
-                    goToPrevLesson={goToPrevLesson}
-                    goToNextLesson={goToNextLesson}
                   />
                 </div>
 
@@ -222,39 +243,48 @@ export const PathPlayerPage: React.FC = () => {
             </Show.When>
             <Show.Else>
               {/* Non-Video Layout (Quiz, Document, etc.) */}
-              <div className="px-6 py-8 md:px-10 max-w-[960px] mx-auto w-full flex-1 flex flex-col gap-6">
-                <div className="w-full relative z-10">
-                  <PlayerScreen
-                    lesson={currentLesson}
-                    onComplete={handleLessonCompleteWithAutoNext}
-                    loading={isLoading}
-                    courseName={course?.name || ""}
-                    onNextLesson={goToNextLesson}
-                    onPrevLesson={goToPrevLesson}
-                    hasNext={hasPathNext}
-                    hasPrev={hasPathPrev}
-                  />
-                </div>
+              {currentLesson?.type === LessonType.DOCUMENT ? (
+                <div className="w-full flex-1 flex flex-col">
+                  {/* PDF/DOCUMENT Player expands to full width of the main content column */}
+                  <div className="w-full relative z-10 px-0 sm:px-6 py-0 sm:py-6">
+                    <PlayerScreen
+                      lesson={currentLesson}
+                      onComplete={handleLessonCompleteWithAutoNext}
+                      loading={isLoading}
+                      courseName={course?.name || ""}
+                      onNextLesson={goToNextLesson}
+                      onPrevLesson={goToPrevLesson}
+                      hasNext={hasPathNext}
+                      hasPrev={hasPathPrev}
+                    />
+                  </div>
 
-                {/* Clean bottom navigation bar without duplicate metadata/descriptions for Quizzes */}
-                <div className="flex justify-between items-center border-t border-slate-200 pt-6">
-                  <div>
-                    {currentLesson?.type === LessonType.DOCUMENT && (
+                  {/* Clean Document metadata view centered with proper spacing below */}
+                  <div className="px-6 py-6 md:px-10 max-w-[960px] mx-auto w-full">
+                    <div className="border-t border-slate-200 pt-6">
                       <LessonMetadata
                         currentLessonIndex={currentLessonIndex}
                         currentLesson={currentLesson}
                       />
-                    )}
+                    </div>
                   </div>
-
-                  <LessonControls
-                    hasPathPrev={hasPathPrev}
-                    hasPathNext={hasPathNext}
-                    goToPrevLesson={goToPrevLesson}
-                    goToNextLesson={goToNextLesson}
-                  />
                 </div>
-              </div>
+              ) : (
+                <div className="px-6 py-8 md:px-10 max-w-[960px] mx-auto w-full flex-1 flex flex-col gap-6">
+                  <div className="w-full relative z-10">
+                    <PlayerScreen
+                      lesson={currentLesson}
+                      onComplete={handleLessonCompleteWithAutoNext}
+                      loading={isLoading}
+                      courseName={course?.name || ""}
+                      onNextLesson={goToNextLesson}
+                      onPrevLesson={goToPrevLesson}
+                      hasNext={hasPathNext}
+                      hasPrev={hasPathPrev}
+                    />
+                  </div>
+                </div>
+              )}
             </Show.Else>
           </Show>
 

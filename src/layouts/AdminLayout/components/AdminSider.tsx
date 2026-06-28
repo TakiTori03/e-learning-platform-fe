@@ -286,7 +286,7 @@ const AdminSider: React.FC<AdminSiderProps> = ({ userRole = "GUEST" }) => {
           return !item.roles || item.roles.includes(safeRole);
         })
         .map((item): SimpleMenuItem => {
-          const label = collapsedMenu ? (
+          const label = (collapsedMenu && !item.children) ? (
             <Tooltip title={item.label} placement="right">
               {item.label}
             </Tooltip>
@@ -348,6 +348,7 @@ const AdminSider: React.FC<AdminSiderProps> = ({ userRole = "GUEST" }) => {
           {/* Navigation */}
           <Menu
             mode="inline"
+            inlineCollapsed={collapsedMenu}
             selectedKeys={[getSelectedKey(location.pathname)]}
             openKeys={collapsedMenu ? [] : openKeys}
             onOpenChange={(keys) => setOpenKeys(keys)}

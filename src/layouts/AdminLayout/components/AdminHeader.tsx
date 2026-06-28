@@ -108,31 +108,38 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
     </Card>
   ), []);
 
-  const quickActionsMenu = React.useMemo(() => (
-    <Menu
-      className="shadow-lg border border-gray-100 rounded-xl p-1"
-      items={[
-        {
-          key: "add_course",
-          icon: <BookOutlined />,
-          label: "Thêm khóa học mới",
-          onClick: () => navigate(pathRoutes.instructor.courses),
-        },
-        {
-          key: "add_category",
-          icon: <AppstoreOutlined />,
-          label: "Thêm danh mục",
-          onClick: () => navigate(pathRoutes.admin.categories),
-        },
-        {
-          key: "settings",
-          icon: <SettingOutlined />,
-          label: "Cài đặt tài khoản",
-          onClick: () => navigate(pathRoutes.admin.settings),
-        },
-      ]}
-    />
-  ), [navigate]);
+  const quickActionsMenu = React.useMemo(() => {
+    const items = [];
+    if (user?.role === "INSTRUCTOR") {
+      items.push({
+        key: "add_course",
+        icon: <BookOutlined />,
+        label: "Thêm khóa học mới",
+        onClick: () => navigate(pathRoutes.instructor.courses),
+      });
+    }
+    if (user?.role === "ADMIN") {
+      items.push({
+        key: "add_category",
+        icon: <AppstoreOutlined />,
+        label: "Thêm danh mục",
+        onClick: () => navigate(pathRoutes.admin.categories),
+      });
+    }
+    items.push({
+      key: "settings",
+      icon: <SettingOutlined />,
+      label: "Cài đặt tài khoản",
+      onClick: () => navigate(user?.role === "ADMIN" ? pathRoutes.admin.settings : pathRoutes.instructor.settings),
+    });
+
+    return (
+      <Menu
+        className="shadow-lg border border-gray-100 rounded-xl p-1"
+        items={items}
+      />
+    );
+  }, [navigate, user]);
 
   return (
     <Header className="bg-white px-4 md:px-6 flex items-center justify-between shadow-sm h-16">
@@ -185,7 +192,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
         {/* User Profile */}
         <Space
           className="flex border-l border-gray-100 pl-2 sm:pl-4 py-1 cursor-pointer hover:opacity-80 transition-all shrink-0 whitespace-nowrap"
-          onClick={() => navigate(pathRoutes.admin.settings)}
+          onClick={() => navigate(user?.role === "ADMIN" ? pathRoutes.admin.settings : pathRoutes.instructor.settings)}
         >
           <Avatar
             icon={<UserOutlined />}

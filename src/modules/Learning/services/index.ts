@@ -3,15 +3,13 @@ import { API_PREFIX } from "@/constants/api";
 import type { AnyElement, ICourse, IDiscussion, IListResponse } from "@/type";
 
 const COURSE_PREFIX = API_PREFIX.COURSE;
-const INTERACTION_PREFIX = API_PREFIX.INTERACTION;
 const LEARNING_PREFIX = API_PREFIX.LEARNING;
 
 export const learningApi = {
   // --- Enrollment & Progress (Learning Service) ---
   getEnrolledCourseDetail: (courseId: string): Promise<ICourse> => {
     return axiosClient.get<ICourse>(
-      `${LEARNING_PREFIX}/internal/learning/progress/mine`,
-      { courseId }
+      `${LEARNING_PREFIX}/progress/${courseId}`
     );
   },
 
@@ -19,7 +17,7 @@ export const learningApi = {
     courseIds: string[]
   ): Promise<Record<string, AnyElement>> => {
     return axiosClient.get<Record<string, AnyElement>>(
-      `${LEARNING_PREFIX}/internal/learning/progress/bulk/mine`,
+      `${LEARNING_PREFIX}/progress/bulk/mine`,
       { courseIds }
     );
   },
@@ -55,7 +53,8 @@ export const learningApi = {
     courseId: string;
     lessonId: string;
     content: string;
-    videoTime: number;
+    videoTime?: number;
+    page?: number;
   }): Promise<AnyElement> => {
     return axiosClient.post(`${LEARNING_PREFIX}/notes`, data);
   },
@@ -64,10 +63,10 @@ export const learningApi = {
     return axiosClient.delete(`${LEARNING_PREFIX}/notes/${noteId}`);
   },
 
-  // --- Discussions (Interaction Service) ---
+  // --- Discussions (Learning Service) ---
   getDiscussions: (lessonId: string): Promise<IListResponse<IDiscussion>> => {
     return axiosClient.get<IListResponse<IDiscussion>>(
-      `${INTERACTION_PREFIX}/discussions/lesson/${lessonId}`
+      `${LEARNING_PREFIX}/discussions/lesson/${lessonId}`
     );
   },
 
@@ -79,20 +78,20 @@ export const learningApi = {
     parentId?: string;
   }): Promise<IDiscussion> => {
     return axiosClient.post<IDiscussion>(
-      `${INTERACTION_PREFIX}/discussions`,
+      `${LEARNING_PREFIX}/discussions`,
       data
     );
   },
 
   likeDiscussion: (id: string): Promise<IDiscussion> => {
     return axiosClient.post<IDiscussion>(
-      `${INTERACTION_PREFIX}/discussions/${id}/like`
+      `${LEARNING_PREFIX}/discussions/${id}/like`
     );
   },
 
   dislikeDiscussion: (id: string): Promise<IDiscussion> => {
     return axiosClient.post<IDiscussion>(
-      `${INTERACTION_PREFIX}/discussions/${id}/dislike`
+      `${LEARNING_PREFIX}/discussions/${id}/dislike`
     );
   },
 
@@ -100,6 +99,12 @@ export const learningApi = {
   getLearners: (courseId: string): Promise<string[]> => {
     return axiosClient.get<string[]>(
       `${COURSE_PREFIX}/courses/course/getUserByCourse/${courseId}`
+    );
+  },
+
+  getMyAssignments: (): Promise<AnyElement> => {
+    return axiosClient.get<AnyElement>(
+      `${API_PREFIX.AGGREGATOR}/courses/my-assignments`
     );
   },
 };

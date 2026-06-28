@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import CButton from "@/components/UI/Button";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
-import { Card, Row, Col } from "antd";
+import { Card, Row, Col, Pagination } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import type { IUserInfo } from "@/type";
 
@@ -19,7 +19,7 @@ import { UserRole, UserRoleLabels, UserStatus, UserStatusLabels, ActionsType } f
 
 export const UserListPage: React.FC = () => {
   const [page, setPage] = useState(1);
-  const [size] = useState(10);
+  const [size, setSize] = useState(10);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
@@ -68,8 +68,9 @@ export const UserListPage: React.FC = () => {
     setPage(1);
   }, []);
 
-  const handlePageChange = useCallback((p: number) => {
+  const handlePageChange = useCallback((p: number, s: number) => {
     setPage(p);
+    setSize(s);
   }, []);
 
   return (
@@ -139,18 +140,26 @@ export const UserListPage: React.FC = () => {
           columns={columns}
           rowKey="id"
           loading={loadingUsers || updatingStatus}
-          pagination={{
-            current: page,
-            pageSize: size,
-            total: usersData?.totalElements || 0,
-            onChange: handlePageChange,
-            showTotal: TotalTableMessage,
-            showSizeChanger: false,
-          }}
+          pagination={false}
           className="custom-table"
           scroll={{ x: "max-content" }}
         />
       </Card>
+
+      {/* Pagination */}
+      {usersData && usersData.totalElements > 0 && (
+        <div className="flex justify-end mt-6">
+          <Pagination
+            current={page}
+            pageSize={size}
+            total={usersData.totalElements}
+            onChange={handlePageChange}
+            showTotal={(total) => `Tổng số ${total} người dùng`}
+            showSizeChanger={true}
+            pageSizeOptions={["10", "20", "50", "100"]}
+          />
+        </div>
+      )}
 
       {/* Role Assignment Modal (CModal Wrapper inside) */}
       <RoleAssignModal />

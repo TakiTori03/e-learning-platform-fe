@@ -77,7 +77,7 @@ export const PurchaseHistoryPage: React.FC = () => {
             onClick={() => navigate(-1)}
             className="text-gray-500 border-gray-300 rounded-full flex items-center justify-center w-10 h-10 shrink-0 shadow-sm"
           />
-          <div className="bg-primary bg-opacity-10 p-3 rounded-2xl">
+          <div className="bg-blue-50 p-3 rounded-2xl">
             <ShoppingBag className="text-primary w-8 h-8" />
           </div>
           <div>

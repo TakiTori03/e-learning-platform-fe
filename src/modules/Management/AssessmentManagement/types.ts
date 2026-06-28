@@ -36,4 +36,9 @@ export interface IQuizAttempt extends IBase {
   isPassed: boolean;
   isFinalAttempt: boolean;
   submittedAt: string;
+  submittedAnswers?: {
+    questionId: string;
+    selectedOptionIds: string[];
+    isCorrect?: boolean;
+  }[];
 }

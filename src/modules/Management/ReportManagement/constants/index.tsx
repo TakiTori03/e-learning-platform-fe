@@ -1,5 +1,4 @@
 import { formatFullName } from "@/utils/format";
-import React from "react";
 import { Space, Typography, Badge, Avatar } from "antd";
 import { StarOutlined, BookOutlined } from "@ant-design/icons";
 import BaseTag from "@/components/UI/Tag/BaseTag";

@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import LearningHeader from "./LearningHeader";
 import LearningSider from "./LearningSider";
 import LearningMobileTabs from "./LearningMobileTabs";
+import LessonControls from "../path-player/LessonControls";
 import type { ILesson, ISection } from "@/type";
 
 const { Content } = Layout;
@@ -15,7 +16,13 @@ interface LearningLayoutProps {
   sections: ISection[];
   lessons: ILesson[];
   currentLessonId?: string;
+  currentLesson?: ILesson | null;
+  currentLessonIndex?: number;
   handleLessonSelect: (lesson: ILesson) => void;
+  hasPathPrev?: boolean;
+  hasPathNext?: boolean;
+  goToPrevLesson?: () => void;
+  goToNextLesson?: () => void;
 }
 
 const LearningLayout: React.FC<LearningLayoutProps> = ({
@@ -25,7 +32,13 @@ const LearningLayout: React.FC<LearningLayoutProps> = ({
   sections,
   lessons,
   currentLessonId,
+  currentLesson,
+  currentLessonIndex,
   handleLessonSelect,
+  hasPathPrev,
+  hasPathNext,
+  goToPrevLesson,
+  goToNextLesson,
 }) => {
   const { courseId } = useParams<{ courseId: string }>();
   const [isMobile, setIsMobile] = useState(false);
@@ -144,19 +157,47 @@ const LearningLayout: React.FC<LearningLayoutProps> = ({
       />
 
       <Layout className="flex-1 overflow-hidden relative">
-        <Content className="flex flex-col bg-slate-50 overflow-y-auto custom-scrollbar h-full">
-          {children}
+        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+          <Content className="flex-1 bg-slate-50 overflow-y-auto custom-scrollbar min-h-0">
+            {children}
 
-          <LearningMobileTabs
-            courseId={courseId || ""}
-            progressPercent={progressPercent}
-            sections={sections}
-            lessons={lessons}
-            currentLessonId={currentLessonId}
-            handleLessonSelect={handleLessonSelect}
-            isMobile={isMobile}
-          />
-        </Content>
+            <LearningMobileTabs
+              courseId={courseId || ""}
+              progressPercent={progressPercent}
+              sections={sections}
+              lessons={lessons}
+              currentLessonId={currentLessonId}
+              currentLesson={currentLesson}
+              handleLessonSelect={handleLessonSelect}
+              isMobile={isMobile}
+            />
+          </Content>
+
+          {/* Sticky Bottom Navigation Footer */}
+          {goToPrevLesson && goToNextLesson && (
+            <div className="bg-white border-t border-slate-200 px-4 py-3 md:px-8 md:py-4 flex items-center justify-between z-30 shrink-0 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)]">
+              <div className="flex items-center gap-3">
+                {currentLesson && (
+                  <div className="hidden md:flex flex-col">
+                    <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">
+                      Bài học {currentLessonIndex !== undefined ? currentLessonIndex + 1 : ""}
+                    </span>
+                    <span className="text-xs font-bold text-slate-700 truncate max-w-[280px] lg:max-w-[400px]">
+                      {currentLesson.name}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <LessonControls
+                hasPathPrev={!!hasPathPrev}
+                hasPathNext={!!hasPathNext}
+                goToPrevLesson={goToPrevLesson}
+                goToNextLesson={goToNextLesson}
+              />
+            </div>
+          )}
+        </div>
 
         <LearningSider
           courseId={courseId || ""}
@@ -164,6 +205,7 @@ const LearningLayout: React.FC<LearningLayoutProps> = ({
           sections={sections}
           lessons={lessons}
           currentLessonId={currentLessonId}
+          currentLesson={currentLesson}
           handleLessonSelect={handleLessonSelect}
           isMobile={isMobile}
         />
@@ -171,5 +213,6 @@ const LearningLayout: React.FC<LearningLayoutProps> = ({
     </Layout>
   );
 };
+
 
 export default LearningLayout;

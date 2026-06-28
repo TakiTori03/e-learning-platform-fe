@@ -86,12 +86,6 @@ export const sidebarItems: SidebarItem[] = [
     roles: ["ADMIN", "INSTRUCTOR"],
     children: [
       {
-        key: AdminMenuKey.DISCUSS,
-        label: "Thảo luận bài học",
-        path: (role) => role === "ADMIN" ? pathRoutes.admin.discuss : pathRoutes.instructor.discuss,
-        activePatterns: [pathRoutes.instructor.discuss, pathRoutes.admin.discuss],
-      },
-      {
         key: AdminMenuKey.REVIEWS,
         label: "Đánh giá khóa học",
         path: (role) => role === "ADMIN" ? pathRoutes.admin.reviewsCenter : pathRoutes.admin.reports.reviewsCenter,
@@ -161,7 +155,7 @@ export const sidebarItems: SidebarItem[] = [
     icon: <SettingOutlined />,
     roles: ["ADMIN", "INSTRUCTOR"],
     path: (role) => role === "ADMIN" ? pathRoutes.admin.settings : pathRoutes.instructor.settings,
-    activePatterns: [pathRoutes.admin.settings],
+    activePatterns: [pathRoutes.admin.settings, pathRoutes.instructor.settings],
   },
 ];
 

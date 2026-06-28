@@ -12,7 +12,8 @@ export interface INoteItem {
   courseId: string;
   lessonId: string;
   content: string;
-  videoTime: number;
+  videoTime?: number;
+  page?: number;
   createdAt: string;
 }
 
@@ -61,10 +62,19 @@ export const NoteItem: React.FC<NoteItemProps> = React.memo(({
           className="bg-primary/10 text-primary border-none hover:bg-primary hover:text-white rounded-full flex items-center gap-2 px-3"
           onClick={() => onSeek(note)}
         >
-          <ClockCircleOutlined />
-          <span className="font-bold">
-            {formatTime(note.videoTime)}
-          </span>
+          {note.page !== undefined && note.page !== null ? (
+            <>
+              <BookOutlined />
+              <span className="font-bold">Trang {note.page}</span>
+            </>
+          ) : (
+            <>
+              <ClockCircleOutlined />
+              <span className="font-bold">
+                {formatTime(note.videoTime || 0)}
+              </span>
+            </>
+          )}
         </CButton>
 
         <div className="opacity-0 group-hover:opacity-100 transition-opacity">

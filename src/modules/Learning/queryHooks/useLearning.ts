@@ -49,17 +49,45 @@ export const useLearning = (courseId: string, urlLessonId?: string) => {
     return !courseQuery.data || !lessonsQuery.data || !courseDetailQuery.data;
   }, [courseQuery.data, lessonsQuery.data, courseDetailQuery.data]);
 
+  // Sắp xếp danh sách bài học phẳng theo đúng thứ tự phân bổ trong Sections
+  const orderedLessons = useMemo(() => {
+    const flatLessons = lessonsQuery.data || [];
+    const detailData = courseDetailQuery.data;
+    if (!detailData || !detailData.sections || detailData.sections.length === 0) {
+      return flatLessons;
+    }
+
+    let list: ILesson[] = [];
+    detailData.sections.forEach((sec) => {
+      if (sec.lessons && sec.lessons.length > 0) {
+        list.push(...sec.lessons);
+      } else {
+        const secLessons = flatLessons.filter((l) => l.sectionId === sec.id);
+        list.push(...secLessons);
+      }
+    });
+
+    if (list.length === 0) return flatLessons;
+
+    const seen = new Set();
+    return list.filter((l) => {
+      if (!l || !l.id) return false;
+      if (seen.has(l.id)) return false;
+      seen.add(l.id);
+      return true;
+    });
+  }, [lessonsQuery.data, courseDetailQuery.data]);
+
   // Sync static data with store
   useEffect(() => {
-    if (courseQuery.data && lessonsQuery.data && courseDetailQuery.data) {
+    if (courseQuery.data && courseDetailQuery.data && orderedLessons.length > 0) {
       const progressData = courseQuery.data;
-      const flatLessons = lessonsQuery.data;
       const detailData = courseDetailQuery.data;
       
       // Chỉ giữ lại những ID bài học đã hoàn thành thuộc về khóa học hiện tại và loại bỏ trùng lặp
       const finishedLessonIds = Array.from(new Set(
         (progressData.finishedLessonIds || []).filter((id) =>
-          flatLessons.some((l) => l.id === id)
+          orderedLessons.some((l) => l.id === id)
         )
       ));
 
@@ -68,19 +96,19 @@ export const useLearning = (courseId: string, urlLessonId?: string) => {
         progress: progressData.progress || 0,
         finishedLessonIds: finishedLessonIds,
         lastAccessedLessonId: progressData.lastAccessedLessonId,
-        lessons: flatLessons,
+        lessons: orderedLessons,
         sections: detailData.sections || [],
         totalVideosLengthDone: 0,
         isBought: detailData.isBought ?? true,
       };
 
       setCourse(mergedCourse);
-      setLessons(flatLessons);
+      setLessons(orderedLessons);
       setLessonsDoneIds(finishedLessonIds);
     }
   }, [
     courseQuery.data,
-    lessonsQuery.data,
+    orderedLessons,
     courseDetailQuery.data,
     setCourse,
     setLessons,
@@ -89,11 +117,10 @@ export const useLearning = (courseId: string, urlLessonId?: string) => {
 
   // Handle URL lesson routing
   useEffect(() => {
-    const flatLessons = lessonsQuery.data;
-    if (!flatLessons || flatLessons.length === 0) return;
+    if (orderedLessons.length === 0 || isInitializing) return;
 
     if (urlLessonId) {
-      const targetLesson = flatLessons.find((l) => l.id === urlLessonId);
+      const targetLesson = orderedLessons.find((l) => l.id === urlLessonId);
       if (targetLesson) {
         setCurrentLesson(targetLesson);
       }
@@ -101,24 +128,23 @@ export const useLearning = (courseId: string, urlLessonId?: string) => {
     }
 
     const progressData = courseQuery.data;
-    const flatLessonsList = lessonsQuery.data || [];
     const finishedLessonIds = (progressData?.finishedLessonIds || []).filter((id) =>
-      flatLessonsList.some((l) => l.id === id)
+      orderedLessons.some((l) => l.id === id)
     );
     const backendLastAccessedId = progressData?.lastAccessedLessonId;
 
     const savedLastLessonId = localStorage.getItem(`last_lesson_${courseId}`);
-    const backendSavedLesson = flatLessons.find((l) => l.id === backendLastAccessedId);
-    const savedLesson = flatLessons.find((l) => l.id === savedLastLessonId);
+    const backendSavedLesson = orderedLessons.find((l) => l.id === backendLastAccessedId);
+    const savedLesson = orderedLessons.find((l) => l.id === savedLastLessonId);
 
-    let targetId = flatLessons[0].id;
+    let targetId = orderedLessons[0].id;
 
     if (backendSavedLesson) {
       targetId = backendSavedLesson.id;
     } else if (savedLesson) {
       targetId = savedLesson.id;
     } else {
-      const firstIncomplete = flatLessons.find((l) => !finishedLessonIds.includes(l.id));
+      const firstIncomplete = orderedLessons.find((l) => !finishedLessonIds.includes(l.id));
       if (firstIncomplete) {
         targetId = firstIncomplete.id;
       }
@@ -127,8 +153,9 @@ export const useLearning = (courseId: string, urlLessonId?: string) => {
     navigate(`/learning/${courseId}/${targetId}`, { replace: true });
   }, [
     urlLessonId,
-    lessonsQuery.data,
+    orderedLessons,
     courseQuery.data,
+    isInitializing,
     courseId,
     navigate,
     setCurrentLesson,
@@ -153,6 +180,16 @@ export const useLearning = (courseId: string, urlLessonId?: string) => {
 
   const { mutate: trackAccess } = useMutation<AnyElement, Error, string>({
     mutationFn: (lessonId: string) => learningApi.trackAccess(courseId, lessonId),
+    onSuccess: () => {
+      // Làm mới cache tiến trình khóa học hiện tại
+      queryClient.invalidateQueries({
+        queryKey: ["enrolled-course", courseId],
+      });
+      // Làm mới danh sách khóa học để nút "Học tiếp" ở trang ngoài nhận bài học mới nhất tức thì
+      queryClient.invalidateQueries({
+        queryKey: ["enrolled-courses"],
+      });
+    },
   });
 
   const handleLessonSelect = useCallback(

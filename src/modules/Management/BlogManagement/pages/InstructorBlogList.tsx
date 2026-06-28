@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
-import { Form, App, Tooltip, Popconfirm, Pagination } from "antd";
-import { useNavigate } from "react-router-dom";
+import { Form, App, Tooltip, Pagination } from "antd";
+import CPopconfirm from "@/components/UI/Popconfirm";
 import {
   Edit2,
   Trash2,
@@ -33,13 +33,13 @@ import { useAuthStore } from "@/store/useAuthStore";
 // Icons
 import { SearchOutlined } from "@ant-design/icons";
 
-const PAGE_SIZE = 8;
+
 
 export const InstructorBlogList: React.FC = () => {
-  const navigate = useNavigate();
   const { message } = App.useApp();
   const { user } = useAuthStore();
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8);
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
 
@@ -55,7 +55,7 @@ export const InstructorBlogList: React.FC = () => {
   // Queries — filter by current instructor's authorId
   const { data: blogsData, isLoading } = useBlogList({
     page: page - 1,
-    size: PAGE_SIZE,
+    size: pageSize,
     q: searchText || undefined,
     authorId: user?.id,
     status: statusFilter || undefined,
@@ -202,7 +202,7 @@ export const InstructorBlogList: React.FC = () => {
       if (blog.status === "DRAFT") {
         actions.push(
           <Tooltip title="Xuất bản bài viết công khai" key="publish">
-            <Popconfirm
+            <CPopconfirm
               title="Xuất bản bài viết này?"
               description="Bài viết sẽ được hiển thị công khai."
               onConfirm={() => handlePublish(blog.id)}
@@ -213,7 +213,7 @@ export const InstructorBlogList: React.FC = () => {
                 <Send className="w-4 h-4 mr-1.5 text-green-500" />
                 <span className="text-xs font-semibold">Xuất bản</span>
               </div>
-            </Popconfirm>
+            </CPopconfirm>
           </Tooltip>
         );
       }
@@ -221,7 +221,7 @@ export const InstructorBlogList: React.FC = () => {
       // Delete Action
       actions.push(
         <Tooltip title="Xóa bài viết" key="delete">
-          <Popconfirm
+          <CPopconfirm
             title="Xóa bài viết này?"
             description="Hành động này không thể hoàn tác. Toàn bộ bình luận cũng sẽ bị xóa."
             onConfirm={() => handleDelete(blog.id)}
@@ -233,7 +233,7 @@ export const InstructorBlogList: React.FC = () => {
               <Trash2 className="w-4 h-4 mr-1.5 text-red-500" />
               <span className="text-xs font-semibold">Xóa</span>
             </div>
-          </Popconfirm>
+          </CPopconfirm>
         </Tooltip>
       );
 
@@ -300,11 +300,15 @@ export const InstructorBlogList: React.FC = () => {
         <div className="flex justify-end mt-8">
           <Pagination
             current={page}
-            pageSize={PAGE_SIZE}
+            pageSize={pageSize}
             total={totalElements}
-            onChange={(p) => setPage(p)}
+            onChange={(p, s) => {
+              setPage(p);
+              setPageSize(s);
+            }}
             showTotal={(total) => `Tổng số ${total} bài viết`}
-            showSizeChanger={false}
+            showSizeChanger={true}
+            pageSizeOptions={["8", "12", "24", "48"]}
           />
         </div>
       )}

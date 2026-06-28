@@ -9,6 +9,7 @@ import CButton from "@/components/UI/Button";
 import CTextArea from "@/components/UI/TextArea";
 import { For, Show } from "@/components/UI/Template";
 import NoteItem, { type INoteItem } from "./NoteItem";
+import { LessonType } from "@/constants/enums";
 
 const { Title } = Typography;
 
@@ -38,7 +39,7 @@ export const NoteList: React.FC<NoteListProps> = ({
   });
 
   // Create note
-  const createNoteMutation = useMutation<unknown, Error, { courseId: string; lessonId: string; content: string; videoTime: number }>({
+  const createNoteMutation = useMutation<unknown, Error, { courseId: string; lessonId: string; content: string; videoTime?: number; page?: number }>({
     mutationFn: learningApi.createNote,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["learning-notes"] });
@@ -60,15 +61,36 @@ export const NoteList: React.FC<NoteListProps> = ({
   const handleAddNote = () => {
     if (!noteContent.trim()) return;
 
-    // Lấy thời gian hiện tại của video
-    const currentTime = playerRef?.getCurrentTime() || 0;
+    const currentLesson = lessons.find((l) => l.id === lessonId);
 
-    createNoteMutation.mutate({
-      courseId,
-      lessonId,
-      content: noteContent,
-      videoTime: Math.floor(currentTime),
-    });
+    if (currentLesson?.type === LessonType.DOCUMENT) {
+      // 1. Thử lấy trang hiện tại từ PDF playerRef (same-origin iframe window) để phản ánh chính xác trang đang scroll
+      let currentPageNum = 1;
+      if (playerRef && typeof playerRef.getCurrentPage === "function") {
+        currentPageNum = playerRef.getCurrentPage();
+      } else {
+        const searchParams = new URLSearchParams(window.location.search);
+        const pageParam = searchParams.get("page");
+        currentPageNum = pageParam ? parseInt(pageParam, 10) : 1;
+      }
+
+      createNoteMutation.mutate({
+        courseId,
+        lessonId,
+        content: noteContent,
+        page: currentPageNum,
+      });
+    } else {
+      // Lấy thời gian hiện tại của video
+      const currentTime = playerRef?.getCurrentTime() || 0;
+
+      createNoteMutation.mutate({
+        courseId,
+        lessonId,
+        content: noteContent,
+        videoTime: Math.floor(currentTime),
+      });
+    }
   };
 
   const handleDeleteNote = (noteId: string) => {
@@ -81,10 +103,25 @@ export const NoteList: React.FC<NoteListProps> = ({
 
   const handleSeekNote = (note: INoteItem) => {
     if (note.lessonId === lessonId) {
-      seekTo(note.videoTime);
+      if (note.page !== undefined && note.page !== null) {
+        // 1. Chuyển trang trực tiếp bằng PDF API của playerRef (hiệu ứng tức thì, không reload)
+        if (playerRef && typeof playerRef.setCurrentPage === "function") {
+          playerRef.setCurrentPage(note.page);
+        }
+        // 2. Đồng bộ URL search params để giữ trạng thái khi tải lại trang
+        const searchParams = new URLSearchParams(window.location.search);
+        searchParams.set("page", note.page.toString());
+        navigate(`/learning/${courseId}/${note.lessonId}?${searchParams.toString()}`, { replace: true });
+      } else {
+        seekTo(note.videoTime || 0);
+      }
     } else {
-      localStorage.setItem(`last_time_${courseId}_${note.lessonId}`, String(note.videoTime));
-      navigate(`/learning/${courseId}/${note.lessonId}`);
+      if (note.page !== undefined && note.page !== null) {
+        navigate(`/learning/${courseId}/${note.lessonId}?tab=notes&page=${note.page}`);
+      } else {
+        localStorage.setItem(`last_time_${courseId}_${note.lessonId}`, String(note.videoTime || 0));
+        navigate(`/learning/${courseId}/${note.lessonId}?tab=notes`);
+      }
     }
   };
 

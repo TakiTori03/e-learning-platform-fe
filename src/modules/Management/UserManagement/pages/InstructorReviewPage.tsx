@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
-import { Card, Row, Col, Typography } from "antd";
+import { Card, Row, Col, Typography, Pagination } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { Briefcase, FileText } from "lucide-react";
 import type { IUserInfo } from "@/type";
@@ -19,7 +19,7 @@ const { Text, Paragraph } = Typography;
 
 export const InstructorReviewPage: React.FC = () => {
   const [page, setPage] = useState(1);
-  const [size] = useState(10);
+  const [size, setSize] = useState(10);
   const [search, setSearch] = useState("");
 
   // Fetch queries and mutations
@@ -38,8 +38,9 @@ export const InstructorReviewPage: React.FC = () => {
     setPage(1);
   }, []);
 
-  const handlePageChange = useCallback((p: number) => {
+  const handlePageChange = useCallback((p: number, s: number) => {
     setPage(p);
+    setSize(s);
   }, []);
 
   const handleApprove = useCallback((id: string) => {
@@ -127,14 +128,7 @@ export const InstructorReviewPage: React.FC = () => {
           columns={columns}
           rowKey="id"
           loading={loadingUsers || approving || rejecting}
-          pagination={{
-            current: page,
-            pageSize: size,
-            total: usersData?.totalElements || 0,
-            onChange: handlePageChange,
-            showTotal: TotalTableMessage,
-            showSizeChanger: false,
-          }}
+          pagination={false}
           expandable={{
             expandedRowRender: renderExpandedRow,
             rowExpandable: () => true,
@@ -143,6 +137,21 @@ export const InstructorReviewPage: React.FC = () => {
           scroll={{ x: "max-content" }}
         />
       </Card>
+
+      {/* Pagination */}
+      {usersData && usersData.totalElements > 0 && (
+        <div className="flex justify-end mt-6">
+          <Pagination
+            current={page}
+            pageSize={size}
+            total={usersData.totalElements}
+            onChange={handlePageChange}
+            showTotal={(total) => `Tổng số ${total} hồ sơ`}
+            showSizeChanger={true}
+            pageSizeOptions={["10", "20", "50", "100"]}
+          />
+        </div>
+      )}
     </div>
   );
 };

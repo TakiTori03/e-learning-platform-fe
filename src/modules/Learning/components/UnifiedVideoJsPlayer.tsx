@@ -1,9 +1,9 @@
-import { useEffect, useRef, useImperativeHandle, forwardRef, useState, useCallback } from "react";
+import { Show } from "@/components/UI/Template";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import videojs from "video.js";
-import "videojs-youtube";
 import "video.js/dist/video-js.css";
-import { Show } from "@/components/UI/Template";
+import "videojs-youtube";
 
 // Hotfix to prevent deprecation warnings for videojs.createTimeRange from third-parties
 interface IVideoJsExtended {
@@ -102,7 +102,7 @@ const PLAYER_STYLE = `
     transition: all 0.3s ease !important;
   }
   .vjs-theme-premium:hover .vjs-big-play-button { transform: scale(1.1); background-color: #2272eb !important; }
-  
+
   .vjs-theme-premium .vjs-control-bar {
     background: linear-gradient(0deg, rgba(2, 6, 23, 0.95) 0%, rgba(2, 6, 23, 0.7) 70%, rgba(2, 6, 23, 0) 100%) !important;
     height: 56px !important;
@@ -111,7 +111,7 @@ const PLAYER_STYLE = `
     display: flex !important;
     align-items: center !important;
   }
-  
+
   /* Center all native button icons vertically in the 56px control bar */
   .vjs-theme-premium .vjs-control-bar .vjs-control:not(.vjs-progress-control) {
     height: 100% !important;
@@ -128,14 +128,14 @@ const PLAYER_STYLE = `
     justify-content: center !important;
     top: 0 !important;
   }
-  
+
   /* Align volume panel children */
   .vjs-theme-premium .vjs-control-bar .vjs-volume-panel {
     display: flex !important;
     align-items: center !important;
     height: 100% !important;
   }
-  
+
   /* Fix layout centering for playback rate and time display controls */
   .vjs-theme-premium .vjs-control-bar .vjs-playback-rate .vjs-playback-rate-value {
     line-height: 56px !important;
@@ -167,7 +167,7 @@ const PLAYER_STYLE = `
   .vjs-theme-premium .vjs-time-control {
     order: 5 !important;
   }
-  
+
   .vjs-theme-premium .vjs-spacer,
   .vjs-theme-premium .vjs-custom-control-spacer {
     order: 6 !important;
@@ -175,7 +175,7 @@ const PLAYER_STYLE = `
     flex: 1 1 auto !important;
     height: 100% !important;
   }
-  
+
   .vjs-theme-premium .vjs-playback-rate { order: 7 !important; }
   .vjs-theme-premium .vjs-subs-caps-button,
   .vjs-theme-premium .vjs-subtitles-button {
@@ -354,6 +354,47 @@ const PLAYER_STYLE = `
     opacity: 0.25 !important;
     cursor: not-allowed !important;
   }
+
+  /* Sleek floating premium menus (subtitles, playback speed, etc.) exactly above the 56px control bar */
+  .vjs-theme-premium .vjs-menu {
+    bottom: 56px !important;
+    margin-bottom: 6px !important;
+    z-index: 50 !important;
+  }
+  .vjs-theme-premium .vjs-menu-content {
+    background-color: #0f172a !important; /* Dark Slate 900 */
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+    padding: 6px 0 !important;
+  }
+  .vjs-theme-premium .vjs-menu-item {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 6px 16px !important;
+    color: #94a3b8 !important; /* Slate 400 */
+    transition: all 0.15s ease !important;
+  }
+  .vjs-theme-premium .vjs-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+  }
+  .vjs-theme-premium .vjs-menu-item.vjs-selected {
+    background-color: #2272eb !important; /* Primary Blue */
+    color: #ffffff !important;
+  }
+  .vjs-theme-premium .vjs-menu-title {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    color: #475569 !important; /* Slate 600 */
+    padding: 6px 16px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    margin-bottom: 4px !important;
+  }
 `;
 
 // Subtitle language metadata configuration is now supplied dynamically via props
@@ -389,7 +430,7 @@ const UnifiedVideoJsPlayer = forwardRef<VideoJsPlayerRef, UnifiedVideoJsPlayerPr
     const [playerEl, setPlayerEl] = useState<HTMLElement | null>(null);
     const [prevBtnEl, setPrevBtnEl] = useState<HTMLDivElement | null>(null);
     const [nextBtnEl, setNextBtnEl] = useState<HTMLDivElement | null>(null);
-    
+
     // Sync callbacks into refs to avoid closure stale issues
     const callbacksRef = useRef({ onProgress, onComplete, onError, onDurationDetected });
     useEffect(() => {
@@ -578,17 +619,17 @@ const UnifiedVideoJsPlayer = forwardRef<VideoJsPlayerRef, UnifiedVideoJsPlayerPr
 
       // Helper function to check if we are in fullscreen
       const checkIsFullscreen = () => {
-        return !!document.fullscreenElement || 
-               !!(document as any).webkitFullscreenElement || 
-               !!(document as any).mozFullScreenElement || 
+        return !!document.fullscreenElement ||
+               !!(document as any).webkitFullscreenElement ||
+               !!(document as any).mozFullScreenElement ||
                !!(document as any).msFullscreenElement;
       };
 
       // Check if we are already fullscreen (e.g. from previous lesson pagination)
       if (checkIsFullscreen()) {
-        const currentFullscreenEl = document.fullscreenElement || 
-                                     (document as any).webkitFullscreenElement || 
-                                     (document as any).mozFullScreenElement || 
+        const currentFullscreenEl = document.fullscreenElement ||
+                                     (document as any).webkitFullscreenElement ||
+                                     (document as any).mozFullScreenElement ||
                                      (document as any).msFullscreenElement;
         if (currentFullscreenEl && currentFullscreenEl.classList.contains("learning-player-container")) {
           playerHtmlEl.classList.add("vjs-fullscreen");
@@ -797,14 +838,14 @@ const UnifiedVideoJsPlayer = forwardRef<VideoJsPlayerRef, UnifiedVideoJsPlayerPr
 
         if (duration && duration > 0) {
           const progress = currentTime / duration;
-          
+
           callbacksRef.current.onProgress?.({
             played: progress,
             playedSeconds: currentTime,
           });
 
           if (progress >= 0.9 && !stateRef.current.hasTriggeredComplete) {
-            stateRef.current.hasTriggeredComplete = true; 
+            stateRef.current.hasTriggeredComplete = true;
             callbacksRef.current.onComplete();
           }
         }
@@ -951,7 +992,7 @@ const UnifiedVideoJsPlayer = forwardRef<VideoJsPlayerRef, UnifiedVideoJsPlayerPr
               <Show.When isTrue={!!(lessonName || courseName)}>
                 <div className="absolute top-6 left-6 z-[9999] pointer-events-none flex flex-col gap-1 vjs-title-overlay select-none">
                   {courseName && (
-                    <span 
+                    <span
                       className="text-white/60 text-xs font-semibold tracking-wide uppercase drop-shadow-md"
                       style={{ textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}
                     >
@@ -959,7 +1000,7 @@ const UnifiedVideoJsPlayer = forwardRef<VideoJsPlayerRef, UnifiedVideoJsPlayerPr
                     </span>
                   )}
                   {lessonName && (
-                    <span 
+                    <span
                       className="text-white text-lg font-bold tracking-normal drop-shadow-lg"
                       style={{ textShadow: "0 2px 4px rgba(0,0,0,0.8)" }}
                     >
@@ -996,8 +1037,8 @@ const UnifiedVideoJsPlayer = forwardRef<VideoJsPlayerRef, UnifiedVideoJsPlayerPr
                   </span>
                   {!volumeFeedback.muted && (
                     <div className="w-16 h-1.5 bg-white/20 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-blue-500 rounded-full transition-all duration-100" 
+                      <div
+                        className="h-full bg-blue-500 rounded-full transition-all duration-100"
                         style={{ width: `${volumeFeedback.volume}%` }}
                       />
                     </div>

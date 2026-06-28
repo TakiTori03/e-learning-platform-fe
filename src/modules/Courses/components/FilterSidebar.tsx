@@ -1,9 +1,9 @@
-import { formatFullName } from "@/utils/format";
-import { Checkbox, Space, Typography, Rate, Radio } from "antd";
-import type { AnyElement } from "@/type";
-import { memo } from "react";
 import CSelect from "@/components/UI/Select";
 import { For } from "@/components/UI/Template";
+import type { AnyElement } from "@/type";
+import { formatFullName } from "@/utils/format";
+import { Checkbox, Radio, Rate, Space, Typography } from "antd";
+import { memo } from "react";
 import { useAllCategories, useAllInstructors } from "../queryHooks/useCourseQueries";
 
 const { Text } = Typography;
@@ -16,9 +16,10 @@ interface FilterSidebarProps {
     categories?: Record<string, number>;
     prices?: Record<string, number>;
   };
+  className?: string;
 }
 
-const FilterSidebar = ({ filters, onFilterChange, aggregations }: FilterSidebarProps) => {
+const FilterSidebar = ({ filters, onFilterChange, aggregations, className }: FilterSidebarProps) => {
   const { data: catData } = useAllCategories();
   const { data: instructorData } = useAllInstructors();
 
@@ -26,7 +27,7 @@ const FilterSidebar = ({ filters, onFilterChange, aggregations }: FilterSidebarP
   const instructors = instructorData || [];
 
   return (
-    <div className="h-fit sticky top-24 pr-4">
+    <div className={className || "h-fit sticky top-24 pr-4"}>
       {/* Authors */}
       <div className="mb-8">
         <Text strong className="block mb-3 text-[1.1rem]">
@@ -34,7 +35,7 @@ const FilterSidebar = ({ filters, onFilterChange, aggregations }: FilterSidebarP
         </Text>
         <CSelect
           mode="multiple"
-          className="w-full h-10"
+          className="w-full"
           placeholder="Select authors to filter!"
           value={filters.authors}
           onChange={(values) => onFilterChange({ authors: values })}
@@ -94,7 +95,7 @@ const FilterSidebar = ({ filters, onFilterChange, aggregations }: FilterSidebarP
         </Text>
         <CSelect
           mode="multiple"
-          className="w-full h-10"
+          className="w-full"
           placeholder="Select topics to filter!"
           value={filters.topics}
           onChange={(values) => onFilterChange({ topics: values })}

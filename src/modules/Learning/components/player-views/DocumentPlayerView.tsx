@@ -1,10 +1,12 @@
+import { useEffect } from "react";
 import { Typography } from "antd";
-import { DownloadOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import type { ILesson } from "@/type";
-import { useEffect, useState } from "react";
 import CButton from "@/components/UI/Button";
 import CTag, { TypeTagEnum } from "@/components/UI/Tag";
 import { Show } from "@/components/UI/Template";
+import PdfPlayer from "@/components/Player/PdfPlayer";
+import { useSearchParams } from "react-router-dom";
+import { useLearningStore } from "../../store/useLearningStore";
 
 const { Title } = Typography;
 
@@ -13,37 +15,26 @@ interface DocumentPlayerViewProps {
   onComplete: (lessonId: string) => void;
 }
 
-const AUTO_COMPLETE_SECONDS = 5;
-
 const DocumentPlayerView = ({
   lesson,
   onComplete,
 }: DocumentPlayerViewProps) => {
-  const [prevLessonId, setPrevLessonId] = useState(lesson.id);
-  const [countdown, setCountdown] = useState(AUTO_COMPLETE_SECONDS);
+  const setPlayerRef = useLearningStore((state) => state.setPlayerRef);
 
-  if (lesson.id !== prevLessonId) {
-    setPrevLessonId(lesson.id);
-    setCountdown(AUTO_COMPLETE_SECONDS);
-  }
-
-  // Auto-complete document after countdown (only if not already done)
+  // Tự động đánh dấu hoàn thành bài học tài liệu sau 5 giây đọc (nếu chưa hoàn thành)
   useEffect(() => {
-    if (lesson.isDone) return;
-
-    const interval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          onComplete(lesson.id);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
+    if (!lesson.isDone) {
+      const timer = setTimeout(() => {
+        onComplete(lesson.id);
+      }, 5000); // 5 giây
+      return () => clearTimeout(timer);
+    }
   }, [lesson.id, lesson.isDone, onComplete]);
+
+  const [searchParams] = useSearchParams();
+  const pageParam = searchParams.get("page");
+  const pageNum = pageParam ? parseInt(pageParam, 10) : undefined;
+  const activePage = pageNum && !isNaN(pageNum) ? pageNum : undefined;
 
   const isPdfUrl = !!(
     lesson.content &&
@@ -53,73 +44,46 @@ const DocumentPlayerView = ({
   );
 
   return (
-    <div className="bg-white w-full h-[70vh] flex flex-col border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-      {/* Header */}
-      <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-slate-50">
-        <div>
-          <Title level={3} className="!m-0 !text-slate-800 text-lg md:text-xl">
-            {lesson.name}
-          </Title>
-          <Show>
-            <Show.When isTrue={!!lesson.description}>
-              <p className="text-slate-500 mt-2 m-0 text-sm">{lesson.description}</p>
-            </Show.When>
-          </Show>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Show>
-            <Show.When isTrue={!!lesson.isDone}>
-              <CTag
-                type={TypeTagEnum.SUCCESS}
-                className="rounded-full px-4 py-1 font-medium m-0 text-sm"
-              >
-                Đã hoàn thành
-              </CTag>
-            </Show.When>
-            <Show.Else>
-              <CTag
-                type={TypeTagEnum.PROCESSING}
-                className="rounded-full px-4 py-1 font-medium m-0 text-sm animate-pulse"
-              >
-                Tự động hoàn thành sau {countdown}s
-              </CTag>
-            </Show.Else>
-          </Show>
-        </div>
-      </div>
-
-      {/* Content Area */}
-      <div className="flex-1 overflow-auto p-8 relative">
-        <Show>
-          <Show.When isTrue={isPdfUrl}>
-            <div className="h-full flex flex-col">
-              <div className="mb-4 flex justify-end">
-                <CButton
-                  type="primary"
-                  icon={<DownloadOutlined />}
-                  href={lesson.content}
-                  target="_blank"
-                  download
-                >
-                  Tải xuống tài liệu
-                </CButton>
+    <div className="w-full flex flex-col gap-6">
+      {/* Main content rendering area (PDF Player or Markdown text) */}
+      <Show>
+        <Show.When isTrue={isPdfUrl}>
+          <PdfPlayer
+            ref={setPlayerRef}
+            fileUrl={lesson.content}
+            fileName={lesson.name}
+            courseId={lesson.courseId}
+            lessonId={lesson.id}
+            isDone={!!lesson.isDone}
+            onComplete={() => onComplete(lesson.id)}
+            height="80vh"
+            activePage={activePage}
+          />
+        </Show.When>
+        <Show.Else>
+          {/* For Markdown / HTML Lessons */}
+          <div className="bg-white w-full border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col p-8 min-h-[400px]">
+            {/* Header for text lessons */}
+            <div className="flex justify-between items-center pb-6 mb-6 border-b border-slate-100 shrink-0">
+              <div>
+                <Title level={3} className="!m-0 !text-slate-800 text-lg md:text-xl font-bold">
+                  {lesson.name}
+                </Title>
+                <Show>
+                  <Show.When isTrue={!!lesson.description}>
+                    <p className="text-slate-500 mt-2 m-0 text-sm">{lesson.description}</p>
+                  </Show.When>
+                </Show>
               </div>
-              <iframe
-                src={`${lesson.content}#toolbar=0`}
-                className="w-full h-full rounded-lg border border-slate-200 shadow-inner"
-                title={lesson.name}
-              />
             </div>
-          </Show.When>
-          <Show.Else>
+
             <div
-              className="prose max-w-none text-slate-700 leading-relaxed text-sm md:text-base"
+              className="prose max-w-none text-slate-700 leading-relaxed text-sm md:text-base flex-1"
               dangerouslySetInnerHTML={{ __html: lesson.content || "" }}
             />
-          </Show.Else>
-        </Show>
-      </div>
+          </div>
+        </Show.Else>
+      </Show>
     </div>
   );
 };

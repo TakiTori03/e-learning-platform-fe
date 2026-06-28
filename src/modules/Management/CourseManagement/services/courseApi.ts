@@ -74,7 +74,7 @@ export const courseApi = {
   },
 
   getCourseHistory: (id: string, page = 1, limit = 10): Promise<IListResponse<any>> => {
-    return axiosClient.get<IListResponse<any>>(`${PREFIX}/admin/courses/${id}/histories`, { page, limit });
+    return axiosClient.get<IListResponse<any>>(`${PREFIX}/courses/admin/courses/${id}/histories`, { page, limit });
   },
 
   getInstructorsSelect: (): Promise<any[]> => {

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { Card, Form, Row, Col, App } from "antd";
+import { Card, Form, Row, Col, App, Pagination } from "antd";
 import { SearchOutlined, UploadOutlined } from "@ant-design/icons";
 import type { ICategory } from "@/type";
 
@@ -27,7 +27,7 @@ import { ActionsType } from "@/constants/enums";
 
 export const CategoryList: React.FC = () => {
   const [page, setPage] = useState(1);
-  const [size] = useState(10);
+  const [size, setSize] = useState(10);
   const [search, setSearch] = useState("");
   const [form] = Form.useForm();
   const { message } = App.useApp();
@@ -142,18 +142,29 @@ export const CategoryList: React.FC = () => {
           columns={columns}
           rowKey="id"
           loading={isLoading}
-          pagination={{
-            current: page,
-            pageSize: size,
-            total: categoriesData?.totalElements || 0,
-            onChange: (p) => setPage(p),
-            showTotal: TotalTableMessage,
-            showSizeChanger: false,
-          }}
+          pagination={false}
           className="custom-table"
           scroll={{ x: "max-content" }}
         />
       </Card>
+
+      {/* Pagination */}
+      {categoriesData && categoriesData.totalElements > 0 && (
+        <div className="flex justify-end mt-6">
+          <Pagination
+            current={page}
+            pageSize={size}
+            total={categoriesData.totalElements}
+            onChange={(p, s) => {
+              setPage(p);
+              setSize(s);
+            }}
+            showTotal={(total) => `Tổng số ${total} danh mục`}
+            showSizeChanger={true}
+            pageSizeOptions={["10", "20", "50", "100"]}
+          />
+        </div>
+      )}
 
       {/* Create / Edit Modal (CModal chuẩn) */}
       <CModal

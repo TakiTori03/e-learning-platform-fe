@@ -1,5 +1,6 @@
 import { formatFullName } from "@/utils/format";
-import { App, Avatar, Badge, Pagination, Popconfirm, Switch, Table, Tag, Tooltip } from "antd";
+import { App, Avatar, Badge, Pagination, Switch, Table, Tag, Tooltip } from "antd";
+import CPopconfirm from "@/components/UI/Popconfirm";
 import {
   Eye,
   Pin,
@@ -8,7 +9,6 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 // Shared UI
 import CInput from "@/components/UI/Input";
@@ -29,12 +29,12 @@ import type { IBlogPost } from "@/modules/Blog/types";
 import { useAdminUsers } from "@/modules/Management/UserManagement/queryHooks";
 import { formatDateTime } from "@/utils/format";
 
-const PAGE_SIZE = 10;
+
 
 export const AdminBlogList: React.FC = () => {
-  const navigate = useNavigate();
   const { message } = App.useApp();
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [authorFilter, setAuthorFilter] = useState<string | undefined>(undefined);
@@ -66,7 +66,7 @@ export const AdminBlogList: React.FC = () => {
   // Queries
   const { data: blogsData, isLoading } = useBlogList({
     page: page - 1,
-    size: PAGE_SIZE,
+    size: pageSize,
     q: searchText || undefined,
     status: statusFilter || undefined,
     authorId: authorFilter || undefined,
@@ -266,7 +266,7 @@ export const AdminBlogList: React.FC = () => {
           {/* Block / Unblock */}
           {record.status === "BLOCKED" ? (
             <Tooltip title="Mở khóa bài viết">
-              <Popconfirm
+              <CPopconfirm
                 title="Mở khóa bài viết này?"
                 description="Bài viết sẽ được hiển thị công khai trở lại."
                 onConfirm={() => handleUnblockBlog(record.id)}
@@ -276,12 +276,12 @@ export const AdminBlogList: React.FC = () => {
                 <button className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-green-500 hover:bg-green-50 transition-colors">
                   <ShieldCheck className="w-4 h-4 text-green-500" />
                 </button>
-              </Popconfirm>
+              </CPopconfirm>
             </Tooltip>
           ) : (
             record.status !== "DRAFT" && (
               <Tooltip title="Khóa bài viết (Vi phạm chính sách)">
-                <Popconfirm
+                <CPopconfirm
                   title="Khóa bài viết này?"
                   description="Bài viết này sẽ bị ẩn ngay lập tức khỏi học viên."
                   onConfirm={() => handleBlockBlog(record.id)}
@@ -292,7 +292,7 @@ export const AdminBlogList: React.FC = () => {
                   <button className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                     <ShieldAlert className="w-4 h-4 text-red-500" />
                   </button>
-                </Popconfirm>
+                </CPopconfirm>
               </Tooltip>
             )
           )}
@@ -392,11 +392,15 @@ export const AdminBlogList: React.FC = () => {
           <div className="flex justify-end p-4 border-t border-gray-50">
             <Pagination
               current={page}
-              pageSize={PAGE_SIZE}
+              pageSize={pageSize}
               total={totalElements}
-              onChange={(p) => setPage(p)}
+              onChange={(p, s) => {
+                setPage(p);
+                setPageSize(s);
+              }}
               showTotal={(total) => `Tổng số ${total} bài viết`}
-              showSizeChanger={false}
+              showSizeChanger={true}
+              pageSizeOptions={["10", "20", "50", "100"]}
             />
           </div>
         )}

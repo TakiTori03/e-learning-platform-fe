@@ -1,9 +1,11 @@
 import CButton from "@/components/UI/Button";
 import { CourseStatus } from "@/constants/enums";
 import type { ICategory, ICourse } from "@/type";
-import { formatDate, formatFullName } from "@/utils/format";
+import CTag, { TypeTagEnum } from "@/components/UI/Tag";
+import { formatDate, formatFullName, formatDateTime } from "@/utils/format";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Badge, Popconfirm, Rate, Space, Tag, Tooltip, Typography } from "antd";
+import { Avatar, Badge, Rate, Space, Tag, Tooltip, Typography } from "antd";
+import CPopconfirm from "@/components/UI/Popconfirm";
 import {
   Archive,
   BookOpen,
@@ -124,7 +126,7 @@ export const getColumnsTableCategory = (
             className="hover:text-blue-500"
           />
         </Tooltip>
-        <Popconfirm
+        <CPopconfirm
           title="Xóa danh mục?"
           description={`Bạn có chắc muốn xóa "${record.name}"? Hành động này không thể hoàn tác.`}
           onConfirm={() => onDelete(record.id)}
@@ -140,7 +142,7 @@ export const getColumnsTableCategory = (
               danger
             />
           </Tooltip>
-        </Popconfirm>
+        </CPopconfirm>
       </Space>
     ),
   },
@@ -280,7 +282,7 @@ export const getColumnsTableCoursesAdmin = ({
           {isPending && (
             <>
               <Tooltip title="Phê duyệt">
-                <Popconfirm
+                <CPopconfirm
                   title="Duyệt khóa học?"
                   description="Khóa học sẽ được xuất bản công khai."
                   onConfirm={() => onApprove(record)}
@@ -292,10 +294,10 @@ export const getColumnsTableCoursesAdmin = ({
                     size="small"
                     icon={<CheckCircle className="w-4 h-4 text-green-500" />}
                   />
-                </Popconfirm>
+                </CPopconfirm>
               </Tooltip>
               <Tooltip title="Từ chối">
-                <Popconfirm
+                <CPopconfirm
                   title="Từ chối khóa học?"
                   description="Trả về cho giảng viên chỉnh sửa."
                   onConfirm={() => onReject(record)}
@@ -308,14 +310,14 @@ export const getColumnsTableCoursesAdmin = ({
                     size="small"
                     icon={<XCircle className="w-4 h-4 text-red-500" />}
                   />
-                </Popconfirm>
+                </CPopconfirm>
               </Tooltip>
             </>
           )}
 
           {!isPending && isPublished && (
             <Tooltip title="Gỡ bỏ">
-              <Popconfirm
+              <CPopconfirm
                 title="Gỡ khóa học?"
                 description="Khóa học sẽ bị ẩn khỏi hệ thống."
                 onConfirm={() => onUnpublish(record)}
@@ -328,13 +330,13 @@ export const getColumnsTableCoursesAdmin = ({
                   size="small"
                   icon={<XCircle className="w-4 h-4 text-orange-500" />}
                 />
-              </Popconfirm>
+              </CPopconfirm>
             </Tooltip>
           )}
 
           {!isPending && !isPublished && (
             <Tooltip title="Xuất bản trực tiếp">
-              <Popconfirm
+              <CPopconfirm
                 title="Xuất bản trực tiếp?"
                 description="Khóa học sẽ xuất bản ngay lập tức."
                 onConfirm={() => onForcePublish(record)}
@@ -346,7 +348,7 @@ export const getColumnsTableCoursesAdmin = ({
                   size="small"
                   icon={<ShieldCheck className="w-4 h-4 text-emerald-500" />}
                 />
-              </Popconfirm>
+              </CPopconfirm>
             </Tooltip>
           )}
 
@@ -487,7 +489,7 @@ export const getColumnsTableCoursesInstructor = ({
 
           {isDraft && (
             <Tooltip title="Gửi duyệt">
-              <Popconfirm
+              <CPopconfirm
                 title="Gửi duyệt khóa học?"
                 description="Gửi yêu cầu kiểm duyệt nội dung cho Admin."
                 onConfirm={() => onSubmitForReview(record)}
@@ -499,7 +501,7 @@ export const getColumnsTableCoursesInstructor = ({
                   size="small"
                   icon={<Send className="w-4 h-4 text-green-500" />}
                 />
-              </Popconfirm>
+              </CPopconfirm>
             </Tooltip>
           )}
 
@@ -516,7 +518,7 @@ export const getColumnsTableCoursesInstructor = ({
 
           {isPublished && (
             <Tooltip title="Lưu trữ">
-              <Popconfirm
+              <CPopconfirm
                 title="Lưu trữ khóa học?"
                 description="Khóa học sẽ bị ẩn khỏi học viên."
                 onConfirm={() => onArchive(record)}
@@ -529,13 +531,13 @@ export const getColumnsTableCoursesInstructor = ({
                   size="small"
                   icon={<Archive className="w-4 h-4 text-red-500" />}
                 />
-              </Popconfirm>
+              </CPopconfirm>
             </Tooltip>
           )}
 
           {isArchived && (
             <Tooltip title="Khôi phục thành nháp">
-              <Popconfirm
+              <CPopconfirm
                 title="Khôi phục khóa học?"
                 description="Chuyển về trạng thái Bản nháp để chỉnh sửa."
                 onConfirm={() => onRestore(record)}
@@ -547,10 +549,77 @@ export const getColumnsTableCoursesInstructor = ({
                   size="small"
                   icon={<RotateCcw className="w-4 h-4 text-indigo-500" />}
                 />
-              </Popconfirm>
+              </CPopconfirm>
             </Tooltip>
           )}
         </Space>
+      );
+    },
+  },
+];
+
+// 4. Interface & Columns for Course History Log
+export interface ICourseHistoryLog {
+  id: string;
+  type: string;
+  createdAt: string;
+  description: string;
+  userId?: string;
+  createdByName?: string;
+  instructor?: {
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+    role?: string;
+  };
+}
+
+export const getHistoryColumns = () => [
+  {
+    title: "Thời gian",
+    dataIndex: "createdAt",
+    key: "createdAt",
+    width: 145,
+    render: (date: string) => <span className="text-gray-500 text-xs">{formatDateTime(date)}</span>,
+  },
+  {
+    title: "Hành động",
+    dataIndex: "type",
+    key: "type",
+    width: 110,
+    render: (type: string) => {
+      let tagType: TypeTagEnum = TypeTagEnum.WAITING;
+      if (type === "CREATE") tagType = TypeTagEnum.SUCCESS;
+      if (type === "DELETE") tagType = TypeTagEnum.ERROR;
+      if (type === "UPDATE") tagType = TypeTagEnum.PROCESSING;
+      return <CTag type={tagType} className="m-0 text-[10px] uppercase font-bold">{type}</CTag>;
+    },
+  },
+  {
+    title: "Mô tả",
+    dataIndex: "description",
+    key: "description",
+    render: (text: string) => <span className="text-sm text-gray-700 font-medium">{text}</span>,
+  },
+  {
+    title: "Tác nhân",
+    key: "actor",
+    width: 220,
+    render: (_: any, log: ICourseHistoryLog) => {
+      const name = log.instructor ? formatFullName(log.instructor) : (log.createdByName || log.userId || "Hệ thống");
+      const role = log.instructor?.role || (log.userId === "SYSTEM" ? "SYSTEM" : "USER");
+      const avatarUrl = log.instructor?.avatar;
+
+      return (
+        <div className="flex items-center gap-2">
+          <Avatar src={avatarUrl} size="small" className="bg-violet-100 text-violet-600 font-semibold">
+            {name ? name.charAt(0).toUpperCase() : "H"}
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold text-gray-600">{name}</span>
+            <span className="text-[10px] text-gray-400 capitalize">{role.toLowerCase()}</span>
+          </div>
+        </div>
       );
     },
   },

@@ -13,6 +13,7 @@ interface LearningSiderProps {
   sections: ISection[];
   lessons: ILesson[];
   currentLessonId?: string;
+  currentLesson?: ILesson | null;
   handleLessonSelect: (lesson: ILesson) => void;
   isMobile: boolean;
 }
@@ -23,6 +24,7 @@ const LearningSider: React.FC<LearningSiderProps> = ({
   sections,
   lessons,
   currentLessonId,
+  currentLesson,
   handleLessonSelect,
   isMobile,
 }) => {
@@ -34,6 +36,15 @@ const LearningSider: React.FC<LearningSiderProps> = ({
       return prev;
     }, { replace: true });
   }, [setSearchParams]);
+
+  // Fallback: If current lesson is QUIZ and active tab is notes, redirect to syllabus
+  useEffect(() => {
+    const isNonVideo = currentLesson?.type === "QUIZ";
+    if (isNonVideo && activeTab === "notes") {
+      setActiveTab("syllabus");
+    }
+  }, [currentLesson?.type, activeTab, setActiveTab]);
+
   const [collapsed, setCollapsed] = useState(false);
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("learning-sidebar-width");
@@ -86,6 +97,7 @@ const LearningSider: React.FC<LearningSiderProps> = ({
     sections,
     lessons,
     currentLessonId,
+    currentLesson,
     handleLessonSelect,
     false, // isMobile = false for desktop Sider
     activeTab

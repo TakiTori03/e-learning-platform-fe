@@ -3,11 +3,14 @@ import {
   QuestionCircleOutlined,
   ContainerOutlined,
   UnorderedListOutlined,
+  RobotOutlined,
 } from "@ant-design/icons";
 import LearningSyllabus from "../LearningSyllabus";
 import DiscussionList from "../discussion/DiscussionList";
 import NoteList from "../note/NoteList";
+import TutorChat from "../tutor/TutorChat";
 import type { ILesson, ISection } from "@/type";
+import { LessonType } from "@/constants/enums";
 
 const LazyTabContent: React.FC<{
   activeKey: string;
@@ -30,11 +33,12 @@ export const useLearningTabs = (
   sections: ISection[],
   lessons: ILesson[],
   currentLessonId: string | undefined,
+  currentLesson: ILesson | null | undefined,
   handleLessonSelect: (lesson: ILesson) => void,
   isMobile: boolean,
   activeTab: string
 ) => {
-  return useMemo(() => [
+  const allTabs = useMemo(() => [
     {
       key: "syllabus",
       label: (
@@ -95,5 +99,29 @@ export const useLearningTabs = (
         </LazyTabContent>
       ),
     },
+    {
+      key: "aitutor",
+      label: (
+        <span className="flex items-center gap-2">
+          <RobotOutlined />
+          AI Tutor
+        </span>
+      ),
+      children: (
+        <LazyTabContent activeKey={activeTab} tabKey="aitutor">
+          <div className={isMobile ? "h-[600px] overflow-hidden rounded-xl border border-slate-200" : "h-full overflow-hidden"}>
+            <TutorChat courseId={courseId} />
+          </div>
+        </LazyTabContent>
+      ),
+    },
   ], [sections, lessons, progressPercent, handleLessonSelect, currentLessonId, courseId, isMobile, activeTab]);
+
+  return useMemo(() => {
+    if (currentLesson?.type === LessonType.QUIZ) {
+      return allTabs.filter((tab) => tab.key !== "notes");
+    }
+    return allTabs;
+  }, [allTabs, currentLesson]);
 };
+

@@ -44,13 +44,15 @@ export const ContactPage: React.FC = () => {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-[#f0f5ff] to-[#f8faff] py-12 px-4 md:px-8">
-      <div className="max-w-[900px] mx-auto bg-white p-8 sm:p-10 rounded-2xl border border-[#e3ecf9] shadow-sm">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+    <div className="bg-gradient-to-br from-slate-50 via-[#f3f7ff] to-slate-50 py-10 px-4 md:px-8">
+      <div className="max-w-[800px] w-full mx-auto bg-white p-8 sm:p-12 rounded-3xl border border-slate-100 shadow-[0_10px_40px_rgba(0,0,0,0.03)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.05)] transition-all duration-300">
+        
+        {/* Header section */}
+        <div className="text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">
             Liên hệ & Phản hồi
           </h2>
-          <p className="text-gray-500 mt-2 text-sm">
+          <p className="text-slate-400 mt-3 text-sm max-w-md mx-auto leading-relaxed">
             Gửi ý kiến đóng góp, báo lỗi hoặc thắc mắc của bạn cho ban quản trị.
           </p>
         </div>
@@ -62,77 +64,99 @@ export const ContactPage: React.FC = () => {
           initialValues={{ type: FeedbackType.GENERAL }}
           requiredMark="optional"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">
-            {/* Cột trái */}
-            <div>
+          <div className="flex flex-col gap-5">
+            
+            {/* Hàng 1: Họ tên & Email */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Họ tên */}
               <Form.Item
-                label={<span className="font-semibold text-gray-700">Họ và tên</span>}
+                label={<span className="font-semibold text-slate-600 text-xs tracking-wide uppercase">Họ và tên</span>}
                 name="name"
                 rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
-                className="mb-5"
+                className="mb-0"
               >
-                <CInput id="name" placeholder="Nhập họ và tên của bạn" size="large" className="rounded-lg h-10" />
+                <CInput 
+                  id="name" 
+                  placeholder="Nhập họ và tên của bạn" 
+                  size="large" 
+                  className="rounded-xl h-11 border-slate-200 hover:border-primary/50 focus:border-primary transition-colors" 
+                />
               </Form.Item>
 
               {/* Email */}
               <Form.Item
-                label={<span className="font-semibold text-gray-700">Địa chỉ Email</span>}
+                label={<span className="font-semibold text-slate-600 text-xs tracking-wide uppercase">Địa chỉ Email</span>}
                 name="email"
                 rules={[
                   { required: true, message: "Vui lòng nhập email!" },
                   { type: "email", message: "Email không đúng định dạng!" },
                 ]}
-                className="mb-5"
+                className="mb-0"
               >
-                <CInput id="email" placeholder="example@email.com" size="large" className="rounded-lg h-10" />
-              </Form.Item>
-
-              {/* Loại phản hồi */}
-              <Form.Item
-                label={<span className="font-semibold text-gray-700">Loại ý kiến phản hồi</span>}
-                name="type"
-                rules={[{ required: true, message: "Vui lòng chọn loại ý kiến phản hồi!" }]}
-                className="mb-5"
-              >
-                <CSelect id="type" size="large" className="h-10" options={feedbackTypeOptions} />
+                <CInput 
+                  id="email" 
+                  placeholder="example@email.com" 
+                  size="large" 
+                  className="rounded-xl h-11 border-slate-200 hover:border-primary/50 focus:border-primary transition-colors" 
+                />
               </Form.Item>
             </div>
 
-            {/* Cột phải */}
-            <div>
+            {/* Hàng 2: Tiêu đề & Loại phản hồi */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Tiêu đề */}
               <Form.Item
-                label={<span className="font-semibold text-gray-700">Tiêu đề</span>}
+                label={<span className="font-semibold text-slate-600 text-xs tracking-wide uppercase">Tiêu đề</span>}
                 name="title"
                 rules={[
                   { required: true, message: "Vui lòng nhập tiêu đề phản hồi!" },
                   { min: 5, message: "Tiêu đề phải có tối thiểu 5 ký tự!" },
                 ]}
-                className="mb-5"
-              >
-                <CInput id="title" placeholder="Nhập tiêu đề ngắn gọn" size="large" className="rounded-lg h-10" />
-              </Form.Item>
-
-              {/* Nội dung */}
-              <Form.Item
-                label={<span className="font-semibold text-gray-700">Nội dung phản hồi</span>}
-                name="content"
-                rules={[
-                  { required: true, message: "Vui lòng nhập nội dung chi tiết!" },
-                  { min: 10, message: "Nội dung phản hồi phải có tối thiểu 10 ký tự!" },
-                ]}
                 className="mb-0"
               >
-                <CTextArea
-                  id="content"
-                  placeholder="Mô tả chi tiết ý kiến của bạn..."
-                  rows={5}
-                  className="rounded-lg"
-                  style={{ minHeight: "135px" }}
+                <CInput 
+                  id="title" 
+                  placeholder="Nhập tiêu đề ngắn gọn" 
+                  size="large" 
+                  className="rounded-xl h-11 border-slate-200 hover:border-primary/50 focus:border-primary transition-colors" 
+                />
+              </Form.Item>
+
+              {/* Loại phản hồi */}
+              <Form.Item
+                label={<span className="font-semibold text-slate-600 text-xs tracking-wide uppercase">Loại ý kiến phản hồi</span>}
+                name="type"
+                rules={[{ required: true, message: "Vui lòng chọn loại ý kiến phản hồi!" }]}
+                className="mb-0"
+              >
+                <CSelect 
+                  id="type" 
+                  size="large" 
+                  className="h-11 rounded-xl border-slate-200 hover:border-primary/50 focus:border-primary transition-colors" 
+                  options={feedbackTypeOptions} 
                 />
               </Form.Item>
             </div>
+
+            {/* Hàng 3: Nội dung (Full width) */}
+            <Form.Item
+              label={<span className="font-semibold text-slate-600 text-xs tracking-wide uppercase">Nội dung phản hồi</span>}
+              name="content"
+              rules={[
+                { required: true, message: "Vui lòng nhập nội dung chi tiết!" },
+                { min: 10, message: "Nội dung phản hồi phải có tối thiểu 10 ký tự!" },
+              ]}
+              className="mb-0"
+            >
+              <CTextArea
+                id="content"
+                placeholder="Mô tả chi tiết ý kiến của bạn..."
+                rows={5}
+                className="rounded-xl border-slate-200 hover:border-primary/50 focus:border-primary transition-colors p-3.5"
+                style={{ minHeight: "135px", resize: "none" }}
+              />
+            </Form.Item>
+
           </div>
 
           {/* Nút gửi */}
@@ -142,7 +166,7 @@ export const ContactPage: React.FC = () => {
               htmlType="submit"
               size="large"
               loading={submitMutation.isPending}
-              className="w-full font-bold h-12 rounded-lg bg-primary text-white"
+              className="w-full font-bold h-12 rounded-xl bg-primary hover:bg-primary/95 text-white shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all border-none"
             >
               Gửi phản hồi
             </CButton>

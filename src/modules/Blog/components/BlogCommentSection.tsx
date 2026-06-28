@@ -11,7 +11,8 @@ import {
   MessageOutlined,
   SendOutlined,
 } from "@ant-design/icons";
-import { Avatar, Empty, message, Pagination, Popconfirm, Spin, Typography } from "antd";
+import { Avatar, Empty, message, Pagination, Spin, Typography } from "antd";
+import CPopconfirm from "@/components/UI/Popconfirm";
 import React, { useState } from "react";
 import {
   useCommentsList,
@@ -20,7 +21,7 @@ import {
 } from "../hooks/useBlogQueries";
 import type { IBlogComment } from "../types";
 
-const { Text, Paragraph } = Typography;
+const { Paragraph } = Typography;
 
 interface BlogCommentSectionProps {
   postId: string;
@@ -255,7 +256,7 @@ const CommentItem: React.FC<{
 
             {/* Actions: Delete for owner */}
             {currentUser?.id === comment.userId && (
-              <Popconfirm
+              <CPopconfirm
                 title="Xóa bình luận"
                 description="Bạn chắc chắn muốn xóa chứ?"
                 onConfirm={() => onDelete(comment.id)}
@@ -266,7 +267,7 @@ const CommentItem: React.FC<{
                 <button className="text-slate-400 hover:text-red-500 transition-colors text-xs flex items-center cursor-pointer">
                   <DeleteOutlined className="text-[10px]" />
                 </button>
-              </Popconfirm>
+              </CPopconfirm>
             )}
           </div>
 
@@ -427,7 +428,7 @@ const RepliesList: React.FC<{
                       </div>
 
                       {currentUser?.id === reply.userId && (
-                        <Popconfirm
+                        <CPopconfirm
                           title="Xóa phản hồi"
                           description="Xóa chứ?"
                           onConfirm={() => handleDeleteReply(reply.id)}
@@ -438,7 +439,7 @@ const RepliesList: React.FC<{
                           <button className="text-slate-400 hover:text-red-500 transition-colors cursor-pointer">
                             <DeleteOutlined className="text-[9px]" />
                           </button>
-                        </Popconfirm>
+                        </CPopconfirm>
                       )}
                     </div>
                     <Paragraph className="text-slate-700 text-xs leading-relaxed mb-0 font-sans">

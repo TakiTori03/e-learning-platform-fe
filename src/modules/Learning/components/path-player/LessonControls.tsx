@@ -22,18 +22,18 @@ export const LessonControls: React.FC<LessonControlsProps> = ({
         icon={<LeftOutlined className="text-xs" />}
         disabled={!hasPathPrev}
         onClick={goToPrevLesson}
-        className="flex-1 sm:flex-initial rounded-full font-semibold border-slate-200 text-slate-600 hover:text-primary hover:border-primary flex items-center justify-center text-xs"
+        className="flex-1 sm:flex-initial rounded-full font-semibold border-slate-200 text-slate-600 hover:text-primary hover:border-primary flex items-center justify-center text-[10px] tracking-wider"
       >
-        Bài trước
+        BÀI TRƯỚC
       </CButton>
       <CButton
         type="primary"
         size="large"
         disabled={!hasPathNext}
         onClick={goToNextLesson}
-        className="flex-1 sm:flex-initial rounded-full bg-primary hover:scale-[1.02] border-none font-bold text-xs shadow-md shadow-primary/10 flex items-center justify-center gap-1.5 transition-all text-white"
+        className="flex-1 sm:flex-initial rounded-full bg-primary hover:scale-[1.02] border-none font-bold text-[10px] tracking-wider shadow-md shadow-primary/10 flex items-center justify-center gap-1.5 transition-all text-white"
       >
-        Bài tiếp theo <RightOutlined className="text-xs" />
+        BÀI TIẾP THEO <RightOutlined className="text-xs" />
       </CButton>
     </div>
   );

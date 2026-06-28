@@ -1,23 +1,26 @@
-import { memo, useState, useMemo } from "react";
-import { Card, Typography, Space } from "antd";
 import {
-  PlayCircleOutlined,
   CheckCircleOutlined,
   GlobalOutlined,
-  HeartOutlined,
   HeartFilled,
+  HeartOutlined,
+  PlayCircleOutlined,
   ShareAltOutlined,
 } from "@ant-design/icons";
+import { Card, Space, Typography, message, notification } from "antd";
+import { memo, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import CButton from "@/components/UI/Button";
 import { TypeCustom } from "@/components/UI/Button/enum";
-import CTag, { TypeTagEnum } from "@/components/UI/Tag";
 import CModal from "@/components/UI/Modal";
+import CTag, { TypeTagEnum } from "@/components/UI/Tag";
 import { useCartStore } from "@/modules/Cart/store/useCartStore";
 import { useWishlist } from "@/modules/Wishlist/queryHooks";
 import type { ICourse } from "@/type";
+import { formatStudyTime } from "@/utils/format";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useOrder } from "@/modules/Order/hooks/useOrder";
 
 const { Title, Text } = Typography;
 
@@ -43,10 +46,18 @@ interface CoursePricingCardProps {
 
 const CoursePricingCard = ({ course }: CoursePricingCardProps) => {
   const navigate = useNavigate();
+  const isAuth = useAuthStore((state) => state.isAuth);
+  const { createOrder, isCreatingOrder } = useOrder();
   const { addToCart, courseIds } = useCartStore();
-  const { isFavorite, addToWishlist, removeFromWishlist } = useWishlist(
-    course.id
-  );
+  const [localFavorite, setLocalFavorite] = useState<boolean>(!!course.isFavorite);
+
+  useEffect(() => {
+    setLocalFavorite(!!course.isFavorite);
+  }, [course.isFavorite, course.id]);
+
+  const { addToWishlist, removeFromWishlist } = useWishlist(course.id, {
+    enabledQuery: false,
+  });
   const [isOpenTrailer, setIsOpenTrailer] = useState(false);
 
   const isFree = useMemo(() => course.finalPrice === 0, [course.finalPrice]);
@@ -71,8 +82,27 @@ const CoursePricingCard = ({ course }: CoursePricingCardProps) => {
   }, [course.price, course.finalPrice]);
 
   const handleBuyNow = () => {
-    if (!isInCart) addToCart(course.id);
-    navigate("/cart");
+    if (!isAuth) {
+      notification.warning({
+        message: "Yêu cầu đăng nhập",
+        description: "Vui lòng đăng nhập tài khoản để thực hiện đăng ký khóa học.",
+      });
+      navigate(`/login?redirect=${window.location.pathname}`);
+      return;
+    }
+    createOrder([course.id]);
+  };
+
+  const handleShare = () => {
+    const shareUrl = window.location.href;
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        message.success("Đã sao chép liên kết chia sẻ vào clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy link:", err);
+        message.error("Không thể sao chép liên kết!");
+      });
   };
 
   return (
@@ -104,8 +134,8 @@ const CoursePricingCard = ({ course }: CoursePricingCardProps) => {
           </div>
         }
       >
-        <div className="p-5">
-          <div className="flex items-center gap-4 mb-8">
+        <div className="p-4">
+          <div className="flex items-center gap-4 mb-4">
             <Title
               level={2}
               className="m-0 text-3xl font-black text-[#1c1d1f] tracking-tight"
@@ -127,11 +157,11 @@ const CoursePricingCard = ({ course }: CoursePricingCardProps) => {
             )}
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2.5">
             {course.isBought ? (
               <CButton
                 typeCustom={TypeCustom.Primary}
-                className="w-full h-14 text-base font-black bg-[#1c1d1f] hover:bg-black border-none rounded-none transition-all shadow-lg active:scale-[0.98]"
+                className="w-full h-11 text-sm font-black bg-[#1c1d1f] hover:bg-black border-none rounded-none transition-all shadow-lg active:scale-[0.98]"
                 onClick={() => navigate(`/learning/${course.id}`)}
               >
                 VÀO HỌC NGAY
@@ -140,14 +170,15 @@ const CoursePricingCard = ({ course }: CoursePricingCardProps) => {
               <>
                 <CButton
                   typeCustom={TypeCustom.Primary}
-                  className="h-14 text-base font-black rounded-none bg-[#a435f0] hover:bg-[#8710d8] border-none shadow-lg active:scale-[0.98] transition-all"
+                  loading={isCreatingOrder}
+                  className="w-full h-11 text-sm font-black rounded-none border-none shadow-lg active:scale-[0.98] transition-all"
                   onClick={handleBuyNow}
                 >
-                  MUA NGAY
+                  {isFree ? "ĐĂNG KÝ NGAY" : "MUA NGAY"}
                 </CButton>
                 <CButton
                   typeCustom={TypeCustom.Secondary}
-                  className="h-14 font-black rounded-none border border-gray-200 text-[#1c1d1f] hover:bg-gray-50 transition-all uppercase shadow-sm"
+                  className="h-11 text-sm font-black rounded-none border border-gray-200 text-[#1c1d1f] hover:bg-gray-50 transition-all uppercase shadow-sm"
                   onClick={() =>
                     isInCart ? navigate("/cart") : addToCart(course.id)
                   }
@@ -158,61 +189,67 @@ const CoursePricingCard = ({ course }: CoursePricingCardProps) => {
             )}
           </div>
 
-          <div className="text-center my-6">
+          <div className="text-center my-3">
             <Text className="text-[10px] uppercase font-bold tracking-widest text-gray-400 opacity-80 block">
               Cam kết hoàn tiền trong 30 ngày
             </Text>
           </div>
 
-          <div className="flex gap-2">
-            <CButton
-              block
-              typeCustom={
-                isFavorite ? TypeCustom.Primary : TypeCustom.Secondary
-              }
-              className="rounded-xl h-11 text-xs font-bold"
-              onClick={() =>
-                isFavorite
-                  ? removeFromWishlist(course.id)
-                  : addToWishlist(course.id)
-              }
-            >
-              {isFavorite ? (
-                <>
-                  <HeartFilled className="mr-1" /> Đã thích
-                </>
-              ) : (
-                <>
-                  <HeartOutlined className="mr-1" /> Yêu thích
-                </>
-              )}
-            </CButton>
-            <CButton
-              block
-              typeCustom={TypeCustom.Secondary}
-              className="rounded-xl h-11 text-xs font-bold"
-            >
-              <ShareAltOutlined className="mr-1" /> Chia sẻ
-            </CButton>
-          </div>
+          {isAuth && (
+            <div className="flex gap-2">
+              <CButton
+                block
+                typeCustom={
+                  localFavorite ? TypeCustom.Primary : TypeCustom.Secondary
+                }
+                className="rounded-xl h-11 text-xs font-bold"
+                onClick={() => {
+                  if (localFavorite) {
+                    removeFromWishlist(course.id);
+                    setLocalFavorite(false);
+                  } else {
+                    addToWishlist(course.id);
+                    setLocalFavorite(true);
+                  }
+                }}
+              >
+                {localFavorite ? (
+                  <>
+                    <HeartFilled className="mr-1" /> Đã thích
+                  </>
+                ) : (
+                  <>
+                    <HeartOutlined className="mr-1" /> Yêu thích
+                  </>
+                )}
+              </CButton>
+              <CButton
+                block
+                typeCustom={TypeCustom.Secondary}
+                className="rounded-xl h-11 text-xs font-bold"
+                onClick={handleShare}
+              >
+                <ShareAltOutlined className="mr-1" /> Chia sẻ
+              </CButton>
+            </div>
+          )}
 
-          <div className="mt-10 border-t border-gray-100 pt-8">
+          <div className="mt-5 border-t border-gray-100 pt-4">
             <Text
               strong
-              className="block mb-6 text-[#1c1d1f] text-sm uppercase font-black tracking-wider"
+              className="block mb-3 text-[#1c1d1f] text-sm uppercase font-black tracking-wider"
             >
               Khóa học này bao gồm:
             </Text>
             <Space
               direction="vertical"
               className="w-full text-[#4a4d53]"
-              size="large"
+              size="middle"
             >
               <div className="flex items-center gap-4 text-xs font-semibold">
                 <PlayCircleOutlined className="text-base opacity-40" />
                 <span>
-                  {Math.round((course.totalVideosLength || 0) / 3600)} giờ video
-                  nén chất lượng cao
+                  {formatStudyTime(course.totalVideosLength)} video nén chất lượng cao
                 </span>
               </div>
               <div className="flex items-center gap-4 text-xs font-semibold">

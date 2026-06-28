@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useEffect } from "react";
 import { Alert, notification } from "antd";
 import type { ILesson } from "@/type";
 import { useLearningStore } from "../../store/useLearningStore";
@@ -14,10 +14,16 @@ interface VideoPlayerViewProps {
   hasPrev?: boolean;
 }
 
+const getYoutubeId = (url: string) => {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
+};
+
 /**
- * 🎥 Adaptive Video Player View using Video.js
- * - Handles YouTube & HLS with a single consistent player core.
- * - Prevents skipping, tracks progress, and saves last watch time for resume.
+ * 🎥 Adaptive Video Player View
+ * - Employs a clean YouTube iframe for preview videos (enables fast clicks, zero lag, original controls).
+ * - Uses UnifiedVideoJsPlayer for core secure HLS streams (prevents skipping, records exact progress).
  */
 const VideoPlayerView = ({
   lesson,
@@ -38,6 +44,21 @@ const VideoPlayerView = ({
     );
   }, [lesson.content]);
 
+  const youtubeId = useMemo(() => {
+    if (!isYoutube || !lesson.content) return null;
+    return getYoutubeId(lesson.content);
+  }, [isYoutube, lesson.content]);
+
+  // Tự động hoàn thành bài học video YouTube (preview) sau 5 giây học thử
+  useEffect(() => {
+    if (isYoutube && !lesson.isDone) {
+      const timer = setTimeout(() => {
+        onComplete(lesson.id);
+      }, 5000); // 5 giây
+      return () => clearTimeout(timer);
+    }
+  }, [isYoutube, lesson.id, lesson.isDone, onComplete]);
+
   const initialTime = useMemo(() => {
     const saved = localStorage.getItem(`last_time_${lesson.courseId}_${lesson.id}`);
     return saved ? parseFloat(saved) : 0;
@@ -45,14 +66,12 @@ const VideoPlayerView = ({
 
   const handleProgress = useCallback(
     (state: { played: number; playedSeconds: number }) => {
-      // 1. If video progress is >= 90% (marked as completed), reset saved position to 0
       if (state.played >= 0.9) {
         localStorage.setItem(
           `last_time_${lesson.courseId}_${lesson.id}`,
           "0"
         );
       } else {
-        // 2. Otherwise, save current position for resume playback
         localStorage.setItem(
           `last_time_${lesson.courseId}_${lesson.id}`,
           String(state.playedSeconds)
@@ -90,15 +109,31 @@ const VideoPlayerView = ({
     );
   }
 
+  // 1. YouTube Preview Video Layout: Render directly with clean iframe for fast load & interaction
+  if (isYoutube && youtubeId) {
+    return (
+      <div className="bg-black w-full aspect-video overflow-hidden relative rounded-xl border border-slate-800 shadow-2xl transition-all duration-300 ease-in-out hover:border-slate-700 group">
+        <iframe
+          src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0&rel=0&modestbranding=1`}
+          title={lesson.name}
+          className="w-full h-full border-none"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+
+  // 2. Secured Course HLS Video Layout: Play via secure UnifiedVideoJsPlayer
   return (
     <div className="bg-black w-full aspect-video overflow-hidden relative rounded-xl border border-slate-800 shadow-2xl transition-all duration-300 ease-in-out hover:border-slate-700 group">
       <UnifiedVideoJsPlayer
         ref={setPlayerRef}
         src={lesson.content}
-        type={isYoutube ? "video/youtube" : "application/x-mpegURL"}
+        type="application/x-mpegURL"
         playing={shouldAutoplay}
         initialTime={initialTime}
-        subtitleUrl={isYoutube ? undefined : (lesson.urlTranscript || lesson.transcriptUrl)} 
+        subtitleUrl={lesson.urlTranscript || lesson.transcriptUrl} 
         onProgress={handleProgress}
         onComplete={handleComplete}
         lessonName={lesson.name}
@@ -109,7 +144,7 @@ const VideoPlayerView = ({
         hasPrev={hasPrev}
         onError={() =>
           notification.error({
-            message: `Không thể kết nối luồng phát video ${isYoutube ? "YouTube" : "HLS"}`,
+            message: "Không thể kết nối luồng phát video HLS",
           })
         }
       />

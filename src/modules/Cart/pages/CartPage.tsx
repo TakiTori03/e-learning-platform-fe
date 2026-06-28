@@ -184,35 +184,33 @@ export const CartPage = () => {
                             title={
                               <Link
                                 to={`/courses/${item.id}`}
-                                className="text-lg font-bold hover:text-primary transition-colors line-clamp-2 mb-2 block"
+                                className="text-lg font-bold hover:text-primary transition-colors line-clamp-2 mb-1.5 block"
                               >
                                 {item.name}
                               </Link>
                             }
                             description={
-                              <Space direction="vertical" size={4}>
-                                <Text type="secondary" className="text-sm">
-                                  Giảng viên:{" "}
-                                  <span className="text-gray-800">
-                                    <Show>
-                                      <Show.When isTrue={!!item.instructor}>
-                                        {formatFullName(item.instructor)}
-                                      </Show.When>
-                                      <Show.Else>E-Learning</Show.Else>
-                                    </Show>
-                                  </span>
-                                </Text>
-                                <div className="mt-2 flex items-baseline gap-3">
-                                  <Text className="text-primary font-bold text-xl">
-                                    {(
-                                      item.finalPrice ??
-                                      item.price ??
-                                      0
-                                    ).toLocaleString()}
-                                    đ
+                              <div className="mt-2 flex items-center gap-3">
+                                {item.finalPrice !== undefined &&
+                                item.price !== undefined &&
+                                item.price > item.finalPrice ? (
+                                  <>
+                                    <Text className="text-primary font-black text-xl m-0 leading-none">
+                                      {item.finalPrice.toLocaleString()}đ
+                                    </Text>
+                                    <Text delete className="text-gray-400 text-sm font-medium m-0 leading-none">
+                                      {item.price.toLocaleString()}đ
+                                    </Text>
+                                    <span className="bg-rose-50 text-rose-600 font-black text-[10px] px-1.5 py-0.5 rounded border border-rose-100 uppercase tracking-wide leading-none shrink-0">
+                                      -{Math.round(((item.price - item.finalPrice) / item.price) * 100)}%
+                                    </span>
+                                  </>
+                                ) : (
+                                  <Text className="text-primary font-black text-xl m-0 leading-none">
+                                    {(item.price ?? 0).toLocaleString()}đ
                                   </Text>
-                                </div>
-                              </Space>
+                                )}
+                              </div>
                             }
                           />
                         </List.Item>

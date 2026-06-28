@@ -12,8 +12,8 @@ import {
   HomeOutlined,
   AppstoreOutlined,
   ContactsOutlined,
-  InfoCircleOutlined,
   ReadOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import {
   Avatar,
@@ -32,6 +32,7 @@ import { authApi } from "@/modules/Auth/services/authApi";
 import logo from "@/assets/images/e-learning-logo.svg";
 import { getUserMenuItems } from "./menuconfig";
 import { formatFullName } from "@/utils/format";
+import { useCartStore } from "@/modules/Cart/store/useCartStore";
 
 // UI Wrappers & Template Components
 import CButton from "@/components/UI/Button";
@@ -44,7 +45,6 @@ const navLinks = [
   { label: "Home", to: "/", icon: <HomeOutlined /> },
   { label: "Courses", to: "/courses", icon: <AppstoreOutlined /> },
   { label: "Blog", to: "/blog", icon: <ReadOutlined /> },
-  { label: "About", to: "/about-us", icon: <InfoCircleOutlined /> },
   { label: "Contact", to: "/contact", icon: <ContactsOutlined /> },
 ];
 
@@ -52,6 +52,7 @@ export const Header: React.FC = React.memo(() => {
   const isAuth = useAuthStore((state) => state.isAuth);
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  const courseIds = useCartStore((state) => state.courseIds);
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = theme.useToken();
@@ -76,8 +77,10 @@ export const Header: React.FC = React.memo(() => {
   return (
     <AntHeader
       style={{
-        position: "sticky",
+        position: "fixed",
         top: 0,
+        left: 0,
+        right: 0,
         zIndex: 1000,
         width: "100%",
         display: "flex",
@@ -85,10 +88,10 @@ export const Header: React.FC = React.memo(() => {
         backgroundColor: "rgba(255, 255, 255, 0.85)",
         backdropFilter: "blur(12px)",
         borderBottom: `1px solid ${token.colorBorderSecondary}`,
-        padding: "0 24px",
         height: "68px",
         boxShadow: "0 4px 20px -5px rgba(0,0,0,0.05)",
       }}
+      className="px-3 sm:px-6"
     >
       <div className="container mx-auto flex items-center justify-between w-full h-full">
         <Space size={12}>
@@ -96,18 +99,18 @@ export const Header: React.FC = React.memo(() => {
           <CButton
             type="text"
             icon={<MenuOutlined style={{ fontSize: "20px" }} />}
-            className="lg:!hidden flex items-center"
+            className="xl:!hidden flex items-center"
             onClick={() => setIsMobileMenuOpen(true)}
           />
 
           {/* LOGO */}
           <Link to="/" className="flex items-center flex-shrink-0 transition-transform hover:scale-105">
-            <img src={logo} alt="Logo" className="h-9 md:h-11 w-auto" />
+            <img src={logo} alt="Logo" className="h-8 sm:h-9 md:h-11 w-auto" />
           </Link>
         </Space>
 
         {/* NAVIGATION (Desktop) */}
-        <nav className="hidden lg:flex items-center gap-8 ml-10">
+        <nav className="hidden xl:flex items-center gap-4 xl:gap-6 2xl:gap-8 ml-6 xl:ml-8 2xl:ml-10">
           <For
             array={navLinks}
             render={(item) => (
@@ -124,13 +127,27 @@ export const Header: React.FC = React.memo(() => {
           />
           <Show>
             <Show.When isTrue={isAuth}>
-              <Link
-                to="/start"
-                className="font-semibold text-sm border-l pl-8 transition-colors text-gray-500 hover:text-blue-600"
+              <div
+                className="flex items-center gap-4 xl:gap-6 2xl:gap-8 border-l pl-4 xl:pl-6 2xl:pl-8 font-semibold text-sm"
                 style={{ borderColor: token.colorBorder }}
               >
-                My Learning
-              </Link>
+                <Link
+                  to="/start"
+                  className={`transition-colors ${
+                    location.pathname === "/start" ? "text-blue-600" : "text-gray-500 hover:text-blue-600"
+                  }`}
+                >
+                  My Learning
+                </Link>
+                <Link
+                  to="/assignments"
+                  className={`transition-colors ${
+                    location.pathname === "/assignments" ? "text-blue-600" : "text-gray-500 hover:text-blue-600"
+                  }`}
+                >
+                  My Assignments
+                </Link>
+              </div>
             </Show.When>
           </Show>
         </nav>
@@ -138,7 +155,7 @@ export const Header: React.FC = React.memo(() => {
         {/* SEARCH & ACTIONS */}
         <div className="flex items-center gap-3 md:gap-6 ml-auto">
           {/* Search Box (Tablets & Desktop) */}
-          <div className="hidden lg:block lg:w-48 xl:w-80">
+          <div className="hidden lg:block lg:w-44 xl:w-64 2xl:w-80">
             <CInput
               placeholder="Search courses..."
               prefix={
@@ -155,11 +172,11 @@ export const Header: React.FC = React.memo(() => {
             />
           </div>
 
-          <Space size={16} className="items-center">
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-5">
             {/* Wishlist */}
             <Show>
               <Show.When isTrue={isAuth}>
-                <Link to="/wishlist" className="hidden sm:flex items-center hover:scale-110 transition-transform">
+                <Link to="/wishlist" className="flex items-center hover:scale-110 transition-transform">
                   <Badge dot offset={[-2, 2]}>
                     <HeartOutlined
                       style={{ fontSize: 20, color: token.colorTextHeading }}
@@ -170,8 +187,8 @@ export const Header: React.FC = React.memo(() => {
             </Show>
 
             {/* Cart */}
-            <Link to="/cart" className="hidden sm:flex items-center hover:scale-110 transition-transform">
-              <Badge count={0} size="small" showZero={false}>
+            <Link to="/cart" className="flex items-center hover:scale-110 transition-transform">
+              <Badge count={courseIds.length} size="small" showZero={false}>
                 <ShoppingCartOutlined
                   style={{ fontSize: 22, color: token.colorTextHeading }}
                 />
@@ -222,12 +239,13 @@ export const Header: React.FC = React.memo(() => {
                     }}
                     className="px-5 transition-all duration-300 hover:shadow-md hover:scale-[1.02]"
                   >
-                    {window.innerWidth < 640 ? "Join" : "Join Free"}
+                    <span className="sm:inline hidden">Join Free</span>
+                    <span className="inline sm:hidden">Join</span>
                   </CButton>
                 </div>
               </Show.Else>
             </Show>
-          </Space>
+          </div>
         </div>
       </div>
 
@@ -318,15 +336,22 @@ export const Header: React.FC = React.memo(() => {
               {
                 label: "Browsing",
                 type: "group",
-                children: navLinks.map((link) => ({
-                  key: link.to,
-                  icon: link.icon,
-                  label: <Link to={link.to}>{link.label}</Link>,
-                })),
+                children: [
+                  ...navLinks.map((link) => ({
+                    key: link.to,
+                    icon: link.icon,
+                    label: <Link to={link.to}>{link.label}</Link>,
+                  })),
+                  {
+                    key: "/cart",
+                    label: <Link to="/cart">Shopping Cart</Link>,
+                    icon: <ShoppingCartOutlined />,
+                  },
+                ],
               },
-              { type: "divider" },
               ...(isAuth
                 ? [
+                    { type: "divider" },
                     {
                       label: "Account",
                       type: "group",
@@ -335,6 +360,16 @@ export const Header: React.FC = React.memo(() => {
                           key: "/start",
                           label: <Link to="/start">My Learning</Link>,
                           icon: <BookOutlined />,
+                        },
+                        {
+                          key: "/assignments",
+                          label: <Link to="/assignments">My Assignments</Link>,
+                          icon: <FileTextOutlined />,
+                        },
+                        {
+                          key: "/wishlist",
+                          label: <Link to="/wishlist">Wishlist</Link>,
+                          icon: <HeartOutlined />,
                         },
                         ...(user?.role === "INSTRUCTOR"
                           ? [

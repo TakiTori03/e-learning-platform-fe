@@ -19,7 +19,7 @@ export const useDiscussionSocket = ({ lessonId, page = 0 }: UseDiscussionSocketP
     // 1. Khởi tạo STOMP Client trỏ qua API Gateway
     const gatewayUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
     const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${wsProtocol}//${gatewayUrl.replace(/^https?:\/\//, "")}${API_PREFIX.INTERACTION}/ws-discussion`;
+    const wsUrl = `${wsProtocol}//${gatewayUrl.replace(/^https?:\/\//, "")}${API_PREFIX.LEARNING}/ws-discussion`;
 
     const client = new Client({
       brokerURL: wsUrl,
@@ -36,7 +36,7 @@ export const useDiscussionSocket = ({ lessonId, page = 0 }: UseDiscussionSocketP
     });
 
     // 2. Xử lý khi kết nối thành công
-    client.onConnect = (frame) => {
+    client.onConnect = () => {
       console.log("[WS-STOMP]: Connected to gateway WebSocket.");
 
       // Đăng ký (Subscribe) topic của bài học hiện tại
